@@ -28,16 +28,24 @@
 1. `rails db:migrate`
 2. `rails db:seed` (idempotent — safe to re-run)
 
+Note: `preDeployCommand` in `render.yaml` is not picked up automatically by Render blueprints. Set it manually in the Render dashboard under Settings > Pre-Deploy Command.
+
 Start command: `bundle exec puma -C config/puma.rb`
 
 ## SSL
 
 Production is configured with `assume_ssl = true` and `force_ssl = true`. Render terminates SSL at the proxy. The `/up` health check endpoint is excluded from SSL redirect.
 
+## Database configuration
+
+Production uses `DATABASE_URL` exclusively (set in `config/database.yml`). Do not add explicit `database`, `username`, or `password` fields to the production config — they override `DATABASE_URL` and break the Render connection.
+
+Solid Cache and Solid Queue share the primary database via `DATABASE_URL`.
+
 ## Deploy process
 
 1. Push to `main` on GitHub
-2. Render auto-deploys from the blueprint
+2. Render auto-deploys (auto-deploy is set to "On Commit")
 3. Verify at the Render URL — should see Devise sign-in page
 
 ## Seed user

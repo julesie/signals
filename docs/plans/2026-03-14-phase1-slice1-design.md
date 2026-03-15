@@ -1,6 +1,7 @@
 # Phase 1, Slice 1: Rails App Shell + Auth + Deploy
 
 **Date:** 2026-03-14
+**Status:** Complete (deployed and verified on Render 2026-03-14)
 **Goal:** Get a bare Rails 8 app running on Render behind Devise authentication.
 
 ## Decisions
