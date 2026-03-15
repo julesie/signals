@@ -1,0 +1,23 @@
+pre-commit:
+  parallel: true
+  commands:
+    standardrb:
+      glob: "*.rb"
+      run: bundle exec standardrb --fix {staged_files}
+      stage_fixed: true
+    docs-reminder:
+      run: |
+        if git diff --cached --name-only | grep -qvE '^(docs/|AGENTS\.md|test/|\.md$)'; then
+          echo ""
+          echo "  Reminder: do docs or tests need updating for this change?"
+          echo ""
+        fi
+        exit 0
+
+pre-push:
+  parallel: true
+  commands:
+    brakeman:
+      run: bundle exec brakeman -q --no-pager
+    tests:
+      run: bundle exec rails test

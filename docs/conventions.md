@@ -2,10 +2,22 @@
 
 ## Code style
 
-- **RuboCop** with sensible defaults. Run `bin/rubocop` before committing.
-- **Standard Ruby** (`standardrb`) for consistent formatting. Run `bin/standardrb` before committing.
-- **Brakeman** for security scanning. Run `bin/brakeman` before committing.
-- All three must pass before any commit.
+- **Standard Ruby** (`standardrb`) for formatting and linting. Replaces RuboCop-omakase — `.rubocop.yml` inherits from Standard so both commands use the same rules.
+- **Brakeman** for security scanning. Run `bin/brakeman` to check manually.
+
+## Git hooks (Lefthook)
+
+Hooks are defined in `lefthook.yml` and installed automatically via `bin/setup`.
+
+**Pre-commit (runs on every commit):**
+- `standardrb --fix` on staged `.rb` files (auto-fixes and re-stages)
+- Prints a reminder to consider updating docs/tests if non-doc files are staged
+
+**Pre-push (runs before push):**
+- `brakeman` — blocks push on security warnings
+- `bin/rails test` — blocks push on test failure
+
+To install hooks manually: `bundle exec lefthook install`
 
 ## Testing
 
