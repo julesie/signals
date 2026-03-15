@@ -20,11 +20,13 @@
 
 ## Build and deploy
 
-The build script (`bin/render-build.sh`) runs:
+**Build** (`bin/render-build.sh` — no database access):
 1. `bundle install`
 2. `rails assets:precompile`
-3. `rails db:migrate`
-4. `rails db:seed` (idempotent — safe to re-run)
+
+**Pre-deploy** (has database access, runs before new version starts):
+1. `rails db:migrate`
+2. `rails db:seed` (idempotent — safe to re-run)
 
 Start command: `bundle exec puma -C config/puma.rb`
 

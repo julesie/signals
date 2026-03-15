@@ -10,6 +10,7 @@ services:
     runtime: ruby
     plan: free
     buildCommand: "./bin/render-build.sh"
+    preDeployCommand: "bundle exec rails db:migrate && bundle exec rails db:seed"
     startCommand: "bundle exec puma -C config/puma.rb"
     envVars:
       - key: DATABASE_URL
