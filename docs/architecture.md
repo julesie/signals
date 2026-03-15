@@ -21,12 +21,17 @@ The context assembly layer merges both into a single prompt. The guiding princip
 
 Health Auto Export (iOS) → HTTP POST with JSON → webhook endpoint (bearer token auth) → raw payload logging → parse and store with deduplication.
 
+## Service objects
+
+Business logic lives in `app/services/`, keeping models thin:
+- `HealthDataProcessor` — orchestrates webhook payload processing in a transaction
+- `MetricsParser` — parses health metrics from payload, deduplicates on `(metric_name, recorded_at)`
+- `WorkoutParser` — parses workouts from payload, deduplicates on Health Auto Export UUID
+
 ## Database tables
 
 **Current:**
 - `users` — Devise authentication (single user)
-
-**Phase 1 (next slice):**
 - `health_payloads` — raw webhook JSON, processing status
 - `health_metrics` — non-workout readings, JSONB metadata, deduplicated on `(metric_name, recorded_at)`
 - `workouts` — workout sessions, JSONB for type-specific data, deduplicated on Health Auto Export UUID

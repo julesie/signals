@@ -1,0 +1,175 @@
+{
+  "data": {
+    "workouts": [
+      {
+        "id": "F4A3B2C1-1234-5678-9ABC-DEF012345678",
+        "name": "Running",
+        "start": "2026-03-14 07:30:00 -0800",
+        "end": "2026-03-14 08:15:00 -0800",
+        "duration": 2700,
+        "location": "Outdoor",
+        "isIndoor": false,
+
+        "activeEnergyBurned": { "qty": 485.3, "units": "kcal" },
+        "totalEnergy": { "qty": 612.1, "units": "kcal" },
+        "distance": { "qty": 8.04, "units": "km" },
+        "avgSpeed": { "qty": 10.72, "units": "kmph" },
+        "maxSpeed": { "qty": 14.2, "units": "kmph" },
+        "elevationUp": { "qty": 87.3, "units": "m" },
+        "elevationDown": { "qty": 82.1, "units": "m" },
+        "intensity": { "qty": 9.2, "units": "MET" },
+        "stepCount": { "qty": 7842, "units": "steps" },
+        "stepCadence": { "qty": 174, "units": "spm" },
+
+        "heartRate": {
+          "min": { "qty": 98, "units": "bpm" },
+          "avg": { "qty": 155, "units": "bpm" },
+          "max": { "qty": 178, "units": "bpm" }
+        },
+        "avgHeartRate": { "qty": 155, "units": "bpm" },
+        "maxHeartRate": { "qty": 178, "units": "bpm" },
+
+        "heartRateData": [
+          { "date": "2026-03-14 07:30:15 -0800", "Min": 92, "Avg": 95, "Max": 98, "units": "bpm" },
+          { "date": "2026-03-14 07:31:15 -0800", "Min": 108, "Avg": 112, "Max": 118, "units": "bpm" },
+          { "date": "2026-03-14 07:32:15 -0800", "Min": 125, "Avg": 132, "Max": 138, "units": "bpm" },
+          { "date": "2026-03-14 07:35:00 -0800", "Min": 148, "Avg": 152, "Max": 156, "units": "bpm" },
+          { "date": "2026-03-14 07:40:00 -0800", "Min": 150, "Avg": 155, "Max": 160, "units": "bpm" },
+          { "date": "2026-03-14 07:50:00 -0800", "Min": 158, "Avg": 163, "Max": 170, "units": "bpm" },
+          { "date": "2026-03-14 08:00:00 -0800", "Min": 160, "Avg": 168, "Max": 178, "units": "bpm" },
+          { "date": "2026-03-14 08:10:00 -0800", "Min": 145, "Avg": 150, "Max": 155, "units": "bpm" },
+          { "date": "2026-03-14 08:15:00 -0800", "Min": 130, "Avg": 138, "Max": 142, "units": "bpm" }
+        ],
+
+        "heartRateRecovery": [
+          { "date": "2026-03-14 08:16:00 -0800", "Min": 120, "Avg": 125, "Max": 130, "units": "bpm" },
+          { "date": "2026-03-14 08:17:00 -0800", "Min": 108, "Avg": 112, "Max": 118, "units": "bpm" },
+          { "date": "2026-03-14 08:18:00 -0800", "Min": 98, "Avg": 102, "Max": 108, "units": "bpm" }
+        ],
+
+        "route": [
+          {
+            "latitude": 37.7659,
+            "longitude": -122.4391,
+            "altitude": 78.2,
+            "course": 180.5,
+            "courseAccuracy": 12.0,
+            "horizontalAccuracy": 3.2,
+            "verticalAccuracy": 4.1,
+            "timestamp": "2026-03-14 07:30:15 -0800",
+            "speed": 2.8,
+            "speedAccuracy": 0.5
+          },
+          {
+            "latitude": 37.7651,
+            "longitude": -122.4388,
+            "altitude": 82.1,
+            "course": 175.2,
+            "courseAccuracy": 10.0,
+            "horizontalAccuracy": 2.8,
+            "verticalAccuracy": 3.5,
+            "timestamp": "2026-03-14 07:31:15 -0800",
+            "speed": 3.1,
+            "speedAccuracy": 0.4
+          },
+          {
+            "latitude": 37.7642,
+            "longitude": -122.4395,
+            "altitude": 85.5,
+            "course": 200.1,
+            "courseAccuracy": 8.0,
+            "horizontalAccuracy": 2.5,
+            "verticalAccuracy": 3.2,
+            "timestamp": "2026-03-14 07:32:15 -0800",
+            "speed": 3.0,
+            "speedAccuracy": 0.3
+          }
+        ],
+
+        "walkingAndRunningDistance": [
+          { "date": "2026-03-14 07:31:00 -0800", "qty": 0.18, "units": "km" },
+          { "date": "2026-03-14 07:32:00 -0800", "qty": 0.36, "units": "km" },
+          { "date": "2026-03-14 07:35:00 -0800", "qty": 0.89, "units": "km" },
+          { "date": "2026-03-14 07:40:00 -0800", "qty": 1.78, "units": "km" },
+          { "date": "2026-03-14 07:50:00 -0800", "qty": 3.56, "units": "km" },
+          { "date": "2026-03-14 08:00:00 -0800", "qty": 5.34, "units": "km" },
+          { "date": "2026-03-14 08:10:00 -0800", "qty": 7.12, "units": "km" },
+          { "date": "2026-03-14 08:15:00 -0800", "qty": 8.04, "units": "km" }
+        ]
+      }
+    ],
+
+    "metrics": [
+      {
+        "name": "weight",
+        "units": "kg",
+        "data": [
+          { "qty": 82.5, "date": "2026-03-14 07:15:00 -0800" }
+        ]
+      },
+      {
+        "name": "body_fat_percentage",
+        "units": "%",
+        "data": [
+          { "qty": 18.2, "date": "2026-03-14 07:15:00 -0800" }
+        ]
+      },
+      {
+        "name": "vo2_max",
+        "units": "mL/min·kg",
+        "data": [
+          { "qty": 44.8, "date": "2026-03-14 08:15:00 -0800" }
+        ]
+      },
+      {
+        "name": "resting_heart_rate",
+        "units": "bpm",
+        "data": [
+          { "qty": 58, "date": "2026-03-14 06:00:00 -0800" }
+        ]
+      },
+      {
+        "name": "active_energy",
+        "units": "kcal",
+        "data": [
+          { "qty": 485, "date": "2026-03-14 08:15:00 -0800" }
+        ]
+      },
+      {
+        "name": "step_count",
+        "units": "steps",
+        "data": [
+          { "qty": 8542, "date": "2026-03-14 09:00:00 -0800" }
+        ]
+      },
+      {
+        "name": "heart_rate",
+        "units": "bpm",
+        "data": [
+          { "date": "2026-03-14 06:00:00 -0800", "Min": 55, "Avg": 58, "Max": 62 },
+          { "date": "2026-03-14 07:00:00 -0800", "Min": 62, "Avg": 72, "Max": 85 },
+          { "date": "2026-03-14 08:00:00 -0800", "Min": 130, "Avg": 155, "Max": 178 }
+        ]
+      },
+      {
+        "name": "sleep_analysis",
+        "units": "hr",
+        "data": [
+          {
+            "date": "2026-03-14",
+            "totalSleep": 7.2,
+            "asleep": 6.8,
+            "core": 3.5,
+            "deep": 1.8,
+            "rem": 1.5,
+            "sleepStart": "2026-03-13 22:45:00 -0800",
+            "sleepEnd": "2026-03-14 06:05:00 -0800",
+            "inBed": 7.5,
+            "inBedStart": "2026-03-13 22:30:00 -0800",
+            "inBedEnd": "2026-03-14 06:10:00 -0800"
+          }
+        ]
+      }
+    ]
+  }
+}

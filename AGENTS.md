@@ -23,4 +23,4 @@ AI health coach — HealthKit data + markdown training plans + LLM coaching.
 
 ## What's next
 
-Phase 1 Slice 1 (app shell + auth + deploy) is complete and live on Render. Next up is **Phase 1 Slice 2: webhook endpoint, health data tables, and data pipeline** — needs brainstorming and design before implementation. See `docs/background.md` for the data pipeline spec and database design.
+Phase 1 Slice 2 (webhook endpoint, health data tables, data pipeline, dashboard) is implemented on the `feature/health-data-pipeline` branch. Next steps: **merge to main, deploy to Render, set `WEBHOOK_AUTH_TOKEN` env var, configure Health Auto Export to POST to the webhook, and verify real data flows end-to-end.** Then move on to Phase 2: training plans + Today view.
