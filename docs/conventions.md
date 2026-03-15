@@ -39,6 +39,10 @@ To install hooks manually: `bundle exec lefthook install`
 - **Commit message format:** imperative mood, lowercase after prefix. Prefixes: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `chore:`.
 - **Update docs in the same commit** if your change affects architecture, conventions, or deployment.
 
+## Architecture patterns
+
+- **Service objects for business logic.** Keep models thin (validations, associations, scopes) and extract multi-step operations into service objects in `app/services/`. Name them as nouns or verb phrases describing the operation (e.g. `HealthDataProcessor`, `WorkoutParser`). Controllers call services; services coordinate models.
+
 ## General principles
 
 - **Follow tool conventions.** Use Rails generators, Devise helpers, Tailwind utilities as intended. If you're fighting a tool, stop — either it's the wrong tool or you have the wrong approach.
