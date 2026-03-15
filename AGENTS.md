@@ -6,7 +6,8 @@ AI health coach — HealthKit data + markdown training plans + LLM coaching.
 
 1. **Read before you write.** Check the docs below before making architectural or convention decisions. The answer is probably already documented.
 2. **Update docs before committing.** If your changes affect architecture, conventions, or deployment, update the relevant doc file in the same commit.
-3. **Run linters before committing.** `bin/rubocop`, `bin/standardrb`, `bin/brakeman` must all pass.
+3. **Run linters before committing.** `standardrb` and `brakeman` must pass (enforced by Lefthook git hooks).
+6. **Keep "What's next" current.** Update the section below before committing if the project's next step has changed.
 4. **Keep commits small and focused.** One logical change per commit.
 5. **Follow tool conventions.** If you're fighting a tool, stop and reassess — wrong tool or wrong approach.
 
@@ -19,3 +20,7 @@ AI health coach — HealthKit data + markdown training plans + LLM coaching.
 | [docs/conventions.md](docs/conventions.md) | Writing code, tests, views, or commits |
 | [docs/deployment.md](docs/deployment.md) | Changing infrastructure, env vars, or deploy process |
 | [docs/plans/](docs/plans/) | Design docs and implementation plans for each feature slice |
+
+## What's next
+
+Phase 1 Slice 1 (app shell + auth + deploy) is complete and live on Render. Next up is **Phase 1 Slice 2: webhook endpoint, health data tables, and data pipeline** — needs brainstorming and design before implementation. See `docs/background.md` for the data pipeline spec and database design.
