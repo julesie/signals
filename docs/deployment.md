@@ -15,7 +15,7 @@
 | `RAILS_MASTER_KEY` | Render dashboard (manual) | Decrypts `credentials.yml.enc` |
 | `RAILS_ENV` | `render.yaml` | Set to `production` |
 | `RAILS_LOG_TO_STDOUT` | `render.yaml` | Enable log streaming |
-| `WEBHOOK_AUTH_TOKEN` | Render dashboard (Phase 1) | Bearer token for Health Auto Export |
+| `WEBHOOK_AUTH_TOKEN` | Render dashboard (manual) | Bearer token for Health Auto Export webhook |
 | `OPENAI_API_KEY` | Render dashboard (Phase 3) | GPT-5 Nano API access |
 
 ## Build and deploy
