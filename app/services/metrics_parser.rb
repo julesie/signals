@@ -64,6 +64,9 @@ class MetricsParser
       data_point.except("date", SLEEP_VALUE_KEY)
     when "heart_rate"
       {"min" => data_point["Min"], "avg" => data_point["Avg"], "max" => data_point["Max"]}
+    else
+      extra = data_point.except("date", SIMPLE_VALUE_KEY)
+      extra.presence
     end
   end
 

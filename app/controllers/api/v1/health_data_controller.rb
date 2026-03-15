@@ -3,7 +3,7 @@ class Api::V1::HealthDataController < ActionController::API
 
   def create
     health_payload = HealthPayload.create!(
-      raw_json: params.to_unsafe_h,
+      raw_json: JSON.parse(request.raw_post),
       status: "pending"
     )
 
@@ -26,7 +26,10 @@ class Api::V1::HealthDataController < ActionController::API
   private
 
   def authenticate_token!
+    expected = ENV["WEBHOOK_AUTH_TOKEN"]
+    head(:unauthorized) and return if expected.blank?
+
     token = request.headers["Authorization"]&.split("Bearer ")&.last
-    head :unauthorized unless token.present? && ActiveSupport::SecurityUtils.secure_compare(token, ENV.fetch("WEBHOOK_AUTH_TOKEN"))
+    head :unauthorized unless token.present? && ActiveSupport::SecurityUtils.secure_compare(token, expected)
   end
 end

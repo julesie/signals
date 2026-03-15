@@ -4,7 +4,12 @@ class Api::V1::HealthDataControllerTest < ActionDispatch::IntegrationTest
   setup do
     @payload = JSON.parse(File.read(Rails.root.join("docs/example_workout_payload.json")))
     @token = "test-webhook-token"
+    @original_token = ENV["WEBHOOK_AUTH_TOKEN"]
     ENV["WEBHOOK_AUTH_TOKEN"] = @token
+  end
+
+  teardown do
+    ENV["WEBHOOK_AUTH_TOKEN"] = @original_token
   end
 
   test "returns 401 without authorization header" do

@@ -1,5 +1,5 @@
 class DashboardController < ApplicationController
-  METRIC_TYPES = %w[weight body_fat_percentage vo2_max resting_heart_rate heart_rate_variability step_count active_energy].freeze
+  METRIC_TYPES = %w[weight body_fat_percentage vo2_max resting_heart_rate heart_rate_variability step_count active_energy dietary_energy].freeze
 
   def index
     @latest_metrics = METRIC_TYPES.filter_map do |name|

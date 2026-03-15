@@ -20,9 +20,8 @@ class HealthDataProcessor
 
       metrics_result = MetricsParser.call(metrics_data)
       workouts_result = WorkoutParser.call(workouts_data)
+      @health_payload.update!(status: "processed")
     end
-
-    @health_payload.update!(status: "processed")
 
     Result.new(
       success: true,

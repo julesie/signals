@@ -115,6 +115,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Distance</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg HR</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Energy</th>
             </tr>
           </thead>
@@ -131,6 +132,14 @@
                 <td class="px-6 py-4 text-sm text-gray-600">
                   <% if workout.distance.present? && workout.distance > 0 %>
                     <%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %>
+                  <% else %>
+                    &mdash;
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
+                  <% if avg_hr.present? %>
+                    <%= avg_hr.to_i %> bpm
                   <% else %>
                     &mdash;
                   <% end %>
