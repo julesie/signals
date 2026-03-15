@@ -1,0 +1,15 @@
+{
+  "planPath": "docs/plans/2026-03-15-phase1-slice2-plan.md",
+  "tasks": [
+    {"id": 7, "subject": "Task 1: Database migrations", "status": "pending"},
+    {"id": 8, "subject": "Task 2: Models with validations", "status": "pending", "blockedBy": [7]},
+    {"id": 9, "subject": "Task 3: MetricsParser service", "status": "pending", "blockedBy": [8]},
+    {"id": 10, "subject": "Task 4: WorkoutParser service", "status": "pending", "blockedBy": [8]},
+    {"id": 11, "subject": "Task 5: HealthDataProcessor service", "status": "pending", "blockedBy": [9, 10]},
+    {"id": 12, "subject": "Task 6: Webhook controller", "status": "pending", "blockedBy": [11]},
+    {"id": 13, "subject": "Task 7: Dashboard", "status": "pending", "blockedBy": [11]},
+    {"id": 14, "subject": "Task 8: Update docs and architecture", "status": "pending", "blockedBy": [12, 13]},
+    {"id": 15, "subject": "Task 9: Run full test suite and verify", "status": "pending", "blockedBy": [14]}
+  ],
+  "lastUpdated": "2026-03-15T12:00:00Z"
+}
