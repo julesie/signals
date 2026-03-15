@@ -92,9 +92,9 @@ production:
     password: <%= ENV["SIGNALS_DATABASE_PASSWORD"] %>
   cache:
     <<: *primary_production
-    database: signals_production_cache
+    database: signals_production
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: signals_production_queue
+    database: signals_production
     migrations_paths: db/queue_migrate
