@@ -38,6 +38,7 @@ To install hooks manually: `bundle exec lefthook install`
 - **Small, focused commits.** One logical change per commit.
 - **Commit message format:** imperative mood, lowercase after prefix. Prefixes: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `chore:`.
 - **Update docs in the same commit** if your change affects architecture, conventions, or deployment.
+- **Feature branches, not worktrees.** Git worktrees don't play well with Rails (shared database, migration conflicts, tmp/log state). Use feature branches instead.
 
 ## Architecture patterns
 
