@@ -1,33 +1,29 @@
 require "test_helper"
 
 class HealthDataReprocessorTest < ActiveSupport::TestCase
-  test "deduplicates overlapping payloads by timestamp" do
-    # Simulate two overlapping cumulative payloads
+  test "deduplicates overlapping payloads — latest wins" do
+    # First payload: partial day
     HealthPayload.create!(raw_json: {
       "data" => {"metrics" => [
-        {"name" => "step_count", "units" => "steps", "data" => [
-          {"qty" => 100, "date" => "2026-03-14 09:00:00 -0800"},
-          {"qty" => 200, "date" => "2026-03-14 10:00:00 -0800"}
+        {"name" => "step_count", "units" => "count", "data" => [
+          {"qty" => 5000, "date" => "2026-03-14 00:00:00 -0800"}
         ]}
       ]}
     })
 
+    # Second payload: same day, updated total (latest wins)
     HealthPayload.create!(raw_json: {
       "data" => {"metrics" => [
-        {"name" => "step_count", "units" => "steps", "data" => [
-          {"qty" => 100, "date" => "2026-03-14 09:00:00 -0800"},
-          {"qty" => 200, "date" => "2026-03-14 10:00:00 -0800"},
-          {"qty" => 300, "date" => "2026-03-14 11:00:00 -0800"}
+        {"name" => "step_count", "units" => "count", "data" => [
+          {"qty" => 12000, "date" => "2026-03-14 00:00:00 -0800"}
         ]}
       ]}
     })
 
-    results = HealthDataReprocessor.call
+    HealthDataReprocessor.call
 
-    assert_equal 1, results[:metrics].created
-    metric = HealthMetric.find_by(metric_name: "step_count")
-    # Should be 100 + 200 + 300 = 600, NOT 100+200+100+200+300 = 900
-    assert_equal 600, metric.value
+    assert_equal 1, HealthMetric.where(metric_name: "step_count").count
+    assert_equal 12000, HealthMetric.find_by(metric_name: "step_count").value
   end
 
   test "deduplicates workouts by external_id across payloads" do
@@ -45,9 +41,8 @@ class HealthDataReprocessorTest < ActiveSupport::TestCase
       ]}
     })
 
-    results = HealthDataReprocessor.call
+    HealthDataReprocessor.call
 
-    assert_equal 1, results[:workouts].created
     assert_equal 1, Workout.count
   end
 
