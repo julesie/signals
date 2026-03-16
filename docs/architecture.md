@@ -19,14 +19,24 @@ The context assembly layer merges both into a single prompt. The guiding princip
 
 ## Data pipeline
 
-Health Auto Export (iOS) → HTTP POST with JSON → webhook endpoint (bearer token auth) → raw payload logging → parse and store with deduplication.
+Health Auto Export (iOS) → HTTP POST with JSON → webhook endpoint (bearer token auth) → raw payload logging → parse and store.
+
+**Sync strategy:** Health Auto Export configured with Day grouping — data arrives pre-aggregated as one value per metric per day. Two automations:
+- "Previous 7 Days" every few hours — keeps the last week current
+- "Yesterday" once daily — safety net for complete previous day
+
+**Replace semantics:** Latest payload for a given day overwrites the previous values. No accumulation logic — each sync is self-contained and self-healing.
+
+**Historical backfill:** 30 days of CSV data in `db/seed_data/`, imported via `db:seed` on deploy.
 
 ## Service objects
 
 Business logic lives in `app/services/`, keeping models thin:
 - `HealthDataProcessor` — orchestrates webhook payload processing in a transaction
-- `MetricsParser` — parses health metrics from payload, deduplicates on `(metric_name, recorded_at)`
+- `MetricsParser` — parses health metrics from payload with upsert (create or replace) semantics
 - `WorkoutParser` — parses workouts from payload, deduplicates on Health Auto Export UUID
+- `CsvImporter` — one-time historical data import from Health Auto Export CSV files
+- `HealthDataReprocessor` — rebuilds all health data from stored payloads (deduplicates overlapping data)
 
 ## Database tables
 

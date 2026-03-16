@@ -23,4 +23,4 @@ AI health coach — HealthKit data + markdown training plans + LLM coaching.
 
 ## What's next
 
-Phase 1 Slice 2 (webhook endpoint, health data tables, data pipeline, dashboard) is implemented on the `feature/health-data-pipeline` branch. Next steps: **merge to main, deploy to Render, set `WEBHOOK_AUTH_TOKEN` env var, configure Health Auto Export to POST to the webhook, and verify real data flows end-to-end.** Then move on to Phase 2: training plans + Today view.
+Phase 1 Slice 2 (webhook endpoint, health data tables, data pipeline, dashboard) is complete and deployed on Render. Historical data (30 days) is seeded from CSV on deploy. Health Auto Export is configured with "Previous 7 Days" + Day grouping for ongoing sync, plus a "Yesterday" automation as a safety net. Data uses replace semantics — latest payload for a given day always wins. Next up is **Phase 2: training plans + Today view**.

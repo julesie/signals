@@ -106,15 +106,24 @@ Event-driven nudge detection after each data sync: missed workouts, PRs, trend s
 
 ## Health Auto Export configuration
 
-Once the app is deployed:
+**Endpoint:** `POST https://signals-xcba.onrender.com/api/v1/health_data`
 
+**Auth header:** Key = `Authorization`, Value = `Bearer <WEBHOOK_AUTH_TOKEN>`
+
+**Automations (two):**
+
+1. **"Previous 7 Days"** — REST API, Day grouping, JSON format, every few hours. Covers metrics + workouts. Self-healing: each sync replaces the last 7 days of data.
+2. **"Yesterday"** — REST API, Day grouping, JSON format, once daily (morning). Safety net to capture complete previous day data.
+
+**Setup steps:**
 1. Install Health Auto Export on iPhone (Premium tier)
-2. Create a REST API automation pointing to `https://your-app/api/v1/health_data`
-3. Set format to JSON, Export Version 2
-4. Add Authorization header with Bearer token
-5. Select health metrics: weight, body fat, VO2max, heart rate, resting HR, HRV, steps, active energy, sleep analysis, dietary energy
-6. Select workout types: running, swimming, strength training
-7. Use Manual Export to send a test payload and verify data arrives
-8. Enable background sync
+2. Create two REST API automations as above
+3. Set format to JSON
+4. Add Authorization header: Key = `Authorization`, Value = `Bearer <token>`
+5. Select all health metrics and workout types
+6. Set time grouping to **Day**
+7. Enable background sync
+
+**Historical backfill:** Done via CSV export (30 days) stored in `db/seed_data/` and imported on deploy.
 
 Tips: keep the app in the dock so iOS doesn't kill it. Data syncs more reliably when charging. The home screen widget triggers a manual sync with one tap.
