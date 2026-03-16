@@ -1,5 +1,5 @@
 class HealthDataProcessor
-  Result = Struct.new(:success, :metrics_created, :metrics_skipped, :workouts_created, :workouts_skipped, keyword_init: true)
+  Result = Struct.new(:success, :metrics_created, :metrics_updated, :metrics_skipped, :workouts_created, :workouts_skipped, keyword_init: true)
 
   def self.call(health_payload)
     new(health_payload).call
@@ -26,6 +26,7 @@ class HealthDataProcessor
     Result.new(
       success: true,
       metrics_created: metrics_result.created,
+      metrics_updated: metrics_result.updated,
       metrics_skipped: metrics_result.skipped,
       workouts_created: workouts_result.created,
       workouts_skipped: workouts_result.skipped
@@ -35,6 +36,7 @@ class HealthDataProcessor
     Result.new(
       success: false,
       metrics_created: 0,
+      metrics_updated: 0,
       metrics_skipped: 0,
       workouts_created: 0,
       workouts_skipped: 0

@@ -1,5 +1,5 @@
 class MetricsParser
-  Result = Struct.new(:created, :skipped, keyword_init: true)
+  Result = Struct.new(:created, :updated, :skipped, keyword_init: true)
 
   IGNORED_METRICS = %w[
     time_in_daylight walking_step_length walking_double_support_percentage
@@ -30,13 +30,14 @@ class MetricsParser
 
   def call
     created = 0
+    updated = 0
     skipped = 0
 
     @metrics_data.each do |metric_entry|
       name = metric_entry["name"]
       next if IGNORED_METRICS.include?(name)
 
-      c, s = if name == "heart_rate"
+      c, u, s = if name == "heart_rate"
         process_heart_rate(metric_entry)
       elsif SUM_METRICS.include?(name) || AVG_METRICS.include?(name)
         process_aggregated(metric_entry)
@@ -45,10 +46,11 @@ class MetricsParser
       end
 
       created += c
+      updated += u
       skipped += s
     end
 
-    Result.new(created: created, skipped: skipped)
+    Result.new(created: created, updated: updated, skipped: skipped)
   end
 
   private
@@ -57,36 +59,53 @@ class MetricsParser
     units = metric_entry["units"]
     by_date = metric_entry["data"].group_by { |dp| parse_timestamp(dp["date"]).to_date }
     created = 0
-    skipped = 0
+    updated = 0
 
     by_date.each do |date, points|
       recorded_at = date.beginning_of_day
-      mins = points.filter_map { |dp| dp["Min"] }
-      maxes = points.filter_map { |dp| dp["Max"] }
-      avgs = points.filter_map { |dp| dp["Avg"] || dp["qty"] }
-      next if avgs.empty?
+      new_mins = points.filter_map { |dp| dp["Min"] }
+      new_maxes = points.filter_map { |dp| dp["Max"] }
+      new_avgs = points.filter_map { |dp| dp["Avg"] || dp["qty"] }
+      next if new_avgs.empty?
 
-      if HealthMetric.exists?(metric_name: "heart_rate", recorded_at: recorded_at)
-        skipped += 1
+      existing = HealthMetric.find_by(metric_name: "heart_rate", recorded_at: recorded_at)
+
+      if existing
+        old = existing.metadata || {}
+        old_count = old["count"] || 0
+        old_sum = (old["avg"] || 0) * old_count
+        total_count = old_count + new_avgs.size
+        combined_avg = ((old_sum + new_avgs.sum) / total_count).round(1)
+
+        existing.update!(
+          value: combined_avg,
+          metadata: {
+            "min" => [old["min"], new_mins.any? ? new_mins.min : new_avgs.min].compact.min,
+            "max" => [old["max"], new_maxes.any? ? new_maxes.max : new_avgs.max].compact.max,
+            "avg" => combined_avg,
+            "count" => total_count
+          }
+        )
+        updated += 1
       else
-        avg = (avgs.sum.to_f / avgs.size).round(1)
+        avg = (new_avgs.sum.to_f / new_avgs.size).round(1)
         HealthMetric.create!(
           metric_name: "heart_rate",
           recorded_at: recorded_at,
           value: avg,
           units: units,
           metadata: {
-            "min" => mins.any? ? mins.min : avgs.min,
-            "max" => maxes.any? ? maxes.max : avgs.max,
+            "min" => new_mins.any? ? new_mins.min : new_avgs.min,
+            "max" => new_maxes.any? ? new_maxes.max : new_avgs.max,
             "avg" => avg,
-            "count" => points.size
+            "count" => new_avgs.size
           }
         )
         created += 1
       end
     end
 
-    [created, skipped]
+    [created, updated, 0]
   end
 
   def process_aggregated(metric_entry)
@@ -94,45 +113,66 @@ class MetricsParser
     units = metric_entry["units"]
     by_date = metric_entry["data"].group_by { |dp| parse_timestamp(dp["date"]).to_date }
     created = 0
-    skipped = 0
+    updated = 0
+
+    convert = KJ_TO_KCAL_METRICS.include?(name) && units == "kJ"
 
     by_date.each do |date, points|
       recorded_at = date.beginning_of_day
-      values = points.filter_map { |dp| dp["qty"] }
-      next if values.empty?
+      new_values = points.filter_map { |dp| dp["qty"] }
+      next if new_values.empty?
 
-      convert = KJ_TO_KCAL_METRICS.include?(name) && units == "kJ"
+      new_values = new_values.map { |v| (v / KJ_TO_KCAL).round(4) } if convert
 
-      if HealthMetric.exists?(metric_name: name, recorded_at: recorded_at)
-        skipped += 1
+      existing = HealthMetric.find_by(metric_name: name, recorded_at: recorded_at)
+
+      if existing
+        old = existing.metadata || {}
+        old_count = old["count"] || 0
+
+        if SUM_METRICS.include?(name)
+          new_sum = new_values.sum.round(2)
+          combined_value = (existing.value + new_sum).round(2)
+          total_count = old_count + new_values.size
+          combined_avg = (combined_value.to_f / total_count).round(2)
+        else
+          old_sum = (old["avg"] || 0) * old_count
+          total_count = old_count + new_values.size
+          combined_avg = ((old_sum + new_values.sum) / total_count).round(2)
+          combined_value = combined_avg
+        end
+
+        existing.update!(
+          value: combined_value,
+          metadata: {
+            "min" => [old["min"], new_values.min].compact.min,
+            "max" => [old["max"], new_values.max].compact.max,
+            "avg" => combined_avg,
+            "count" => total_count
+          }
+        )
+        updated += 1
       else
         value = if SUM_METRICS.include?(name)
-          values.sum.round(2)
+          new_values.sum.round(2)
         else
-          (values.sum.to_f / values.size).round(2)
+          (new_values.sum.to_f / new_values.size).round(2)
         end
 
-        avg = (values.sum.to_f / values.size).round(2)
-
-        if convert
-          value = (value / KJ_TO_KCAL).round(1)
-          avg = (avg / KJ_TO_KCAL).round(1)
-        end
-
-        stored_units = convert ? "kcal" : units
+        avg = (new_values.sum.to_f / new_values.size).round(2)
 
         HealthMetric.create!(
           metric_name: name,
           recorded_at: recorded_at,
           value: value,
-          units: stored_units,
-          metadata: {"min" => values.min, "max" => values.max, "avg" => avg, "count" => values.size}
+          units: convert ? "kcal" : units,
+          metadata: {"min" => new_values.min, "max" => new_values.max, "avg" => avg, "count" => new_values.size}
         )
         created += 1
       end
     end
 
-    [created, skipped]
+    [created, updated, 0]
   end
 
   def process_individual(metric_entry)
@@ -160,7 +200,7 @@ class MetricsParser
       end
     end
 
-    [created, skipped]
+    [created, 0, skipped]
   end
 
   def extract_value(name, data_point)

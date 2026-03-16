@@ -31,12 +31,38 @@ class MetricsParserTest < ActiveSupport::TestCase
     hr_data = @metrics_data.find { |m| m["name"] == "heart_rate" }
     result = MetricsParser.call([hr_data])
 
-    # Example payload has 3 HR readings all on 2026-03-14 → 1 daily row
     assert_equal 1, result.created
     metric = HealthMetric.find_by(metric_name: "heart_rate")
     assert_equal 55, metric.metadata["min"]
     assert_equal 178, metric.metadata["max"]
     assert_equal 3, metric.metadata["count"]
+  end
+
+  test "accumulates heart_rate across incremental payloads" do
+    first = {
+      "name" => "heart_rate", "units" => "bpm",
+      "data" => [
+        {"date" => "2026-03-14 08:00:00 -0800", "Min" => 60, "Avg" => 70, "Max" => 80}
+      ]
+    }
+    second = {
+      "name" => "heart_rate", "units" => "bpm",
+      "data" => [
+        {"date" => "2026-03-14 14:00:00 -0800", "Min" => 50, "Avg" => 90, "Max" => 120}
+      ]
+    }
+
+    MetricsParser.call([first])
+    result = MetricsParser.call([second])
+
+    assert_equal 0, result.created
+    assert_equal 1, result.updated
+
+    metric = HealthMetric.find_by(metric_name: "heart_rate")
+    assert_equal 50, metric.metadata["min"]
+    assert_equal 120, metric.metadata["max"]
+    assert_equal 2, metric.metadata["count"]
+    assert_in_delta 80.0, metric.value, 0.1 # avg of 70 and 90
   end
 
   test "aggregates step_count to daily sum" do
@@ -47,6 +73,27 @@ class MetricsParserTest < ActiveSupport::TestCase
     metric = HealthMetric.find_by(metric_name: "step_count")
     assert_equal 8542, metric.value
     assert_equal "steps", metric.units
+  end
+
+  test "accumulates step_count across incremental payloads" do
+    first = {
+      "name" => "step_count", "units" => "steps",
+      "data" => [{"qty" => 3000, "date" => "2026-03-14 09:00:00 -0800"}]
+    }
+    second = {
+      "name" => "step_count", "units" => "steps",
+      "data" => [{"qty" => 2000, "date" => "2026-03-14 15:00:00 -0800"}]
+    }
+
+    MetricsParser.call([first])
+    result = MetricsParser.call([second])
+
+    assert_equal 0, result.created
+    assert_equal 1, result.updated
+
+    metric = HealthMetric.find_by(metric_name: "step_count")
+    assert_equal 5000, metric.value
+    assert_equal 2, metric.metadata["count"]
   end
 
   test "aggregates active_energy to daily sum" do
@@ -71,7 +118,7 @@ class MetricsParserTest < ActiveSupport::TestCase
 
     metric = HealthMetric.find_by(metric_name: "active_energy")
     assert_equal "kcal", metric.units
-    assert_in_delta 1500.0, metric.value, 0.1 # (4184 + 2092) / 4.184
+    assert_in_delta 1500.0, metric.value, 0.1
   end
 
   test "converts basal_energy_burned from kJ to kcal" do
@@ -95,7 +142,7 @@ class MetricsParserTest < ActiveSupport::TestCase
     assert_equal 0, HealthMetric.count
   end
 
-  test "deduplicates on metric_name and recorded_at" do
+  test "skips duplicate individual metrics" do
     weight_data = @metrics_data.find { |m| m["name"] == "weight" }
     MetricsParser.call([weight_data])
     result = MetricsParser.call([weight_data])
@@ -105,22 +152,11 @@ class MetricsParserTest < ActiveSupport::TestCase
     assert_equal 1, HealthMetric.where(metric_name: "weight").count
   end
 
-  test "deduplicates aggregated metrics by day" do
-    hr_data = @metrics_data.find { |m| m["name"] == "heart_rate" }
-    MetricsParser.call([hr_data])
-    result = MetricsParser.call([hr_data])
-
-    assert_equal 0, result.created
-    assert_equal 1, result.skipped
-    assert_equal 1, HealthMetric.where(metric_name: "heart_rate").count
-  end
-
   test "parses all metrics from example payload" do
     result = MetricsParser.call(@metrics_data)
 
     assert result.created > 0
     assert_equal 0, result.skipped
-    # Should be far fewer rows than raw data points due to aggregation
     assert HealthMetric.count < 20
   end
 end
