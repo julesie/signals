@@ -17,6 +17,9 @@ class MetricsParser
     respiratory_rate heart_rate_variability walking_speed
   ].freeze
 
+  KJ_TO_KCAL_METRICS = %w[active_energy basal_energy_burned].freeze
+  KJ_TO_KCAL = 4.184
+
   def self.call(metrics_data)
     new(metrics_data).call
   end
@@ -98,6 +101,8 @@ class MetricsParser
       values = points.filter_map { |dp| dp["qty"] }
       next if values.empty?
 
+      convert = KJ_TO_KCAL_METRICS.include?(name) && units == "kJ"
+
       if HealthMetric.exists?(metric_name: name, recorded_at: recorded_at)
         skipped += 1
       else
@@ -107,12 +112,21 @@ class MetricsParser
           (values.sum.to_f / values.size).round(2)
         end
 
+        avg = (values.sum.to_f / values.size).round(2)
+
+        if convert
+          value = (value / KJ_TO_KCAL).round(1)
+          avg = (avg / KJ_TO_KCAL).round(1)
+        end
+
+        stored_units = convert ? "kcal" : units
+
         HealthMetric.create!(
           metric_name: name,
           recorded_at: recorded_at,
           value: value,
-          units: units,
-          metadata: {"min" => values.min, "max" => values.max, "avg" => (values.sum.to_f / values.size).round(2), "count" => values.size}
+          units: stored_units,
+          metadata: {"min" => values.min, "max" => values.max, "avg" => avg, "count" => values.size}
         )
         created += 1
       end

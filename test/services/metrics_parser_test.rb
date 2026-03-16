@@ -58,6 +58,35 @@ class MetricsParserTest < ActiveSupport::TestCase
     assert_equal 485, metric.value
   end
 
+  test "converts active_energy from kJ to kcal" do
+    kj_data = {
+      "name" => "active_energy",
+      "units" => "kJ",
+      "data" => [
+        {"qty" => 4184.0, "date" => "2026-03-14 12:00:00 -0800"},
+        {"qty" => 2092.0, "date" => "2026-03-14 14:00:00 -0800"}
+      ]
+    }
+    MetricsParser.call([kj_data])
+
+    metric = HealthMetric.find_by(metric_name: "active_energy")
+    assert_equal "kcal", metric.units
+    assert_in_delta 1500.0, metric.value, 0.1 # (4184 + 2092) / 4.184
+  end
+
+  test "converts basal_energy_burned from kJ to kcal" do
+    kj_data = {
+      "name" => "basal_energy_burned",
+      "units" => "kJ",
+      "data" => [{"qty" => 4184.0, "date" => "2026-03-14 08:00:00 -0800"}]
+    }
+    MetricsParser.call([kj_data])
+
+    metric = HealthMetric.find_by(metric_name: "basal_energy_burned")
+    assert_equal "kcal", metric.units
+    assert_in_delta 1000.0, metric.value, 0.1
+  end
+
   test "ignores excluded metrics" do
     ignored = {"name" => "time_in_daylight", "units" => "min", "data" => [{"qty" => 30, "date" => "2026-03-14 12:00:00 -0800"}]}
     result = MetricsParser.call([ignored])
