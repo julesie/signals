@@ -24,25 +24,15 @@ namespace :health_data do
     end
   end
 
-  desc "Clear all health metrics and workouts, then reprocess all payloads"
-  task reprocess_all: :environment do
-    puts "Clearing #{HealthMetric.count} metrics and #{Workout.count} workouts..."
-    HealthMetric.delete_all
-    Workout.delete_all
+  desc "Rebuild all health data from stored payloads (deduplicates overlapping data)"
+  task rebuild: :environment do
+    puts "Merging #{HealthPayload.count} payloads and rebuilding..."
 
-    payloads = HealthPayload.order(:created_at)
-    puts "Reprocessing #{payloads.count} payloads..."
+    results = HealthDataReprocessor.call
+    m = results[:metrics]
+    w = results[:workouts]
 
-    payloads.find_each do |payload|
-      payload.update!(status: "pending")
-      result = HealthDataProcessor.call(payload)
-      if result.success
-        puts "  ##{payload.id}: #{result.metrics_created} metrics, #{result.workouts_created} workouts"
-      else
-        puts "  ##{payload.id} FAILED: #{payload.reload.error_message}"
-      end
-    end
-
-    puts "Done. #{HealthMetric.count} metrics, #{Workout.count} workouts."
+    puts "Done. Created #{m.created} metrics, #{w.created} workouts."
+    puts "Total: #{HealthMetric.count} metrics, #{Workout.count} workouts."
   end
 end
