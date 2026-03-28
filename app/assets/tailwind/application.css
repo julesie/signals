@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Force dark mode via class strategy (always dark, no system toggle) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Dark mode defaults */
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-zinc-900 text-zinc-100;
+}

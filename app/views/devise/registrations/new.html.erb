@@ -1,0 +1,41 @@
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-sm">
+    <h1 class="text-2xl font-bold text-center mb-8">Signals</h1>
+
+    <div class="bg-zinc-800 rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-6">Sign up</h2>
+
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <div class="space-y-4">
+          <div>
+            <%= f.label :email, class: "block text-sm font-medium text-zinc-300 mb-1" %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email",
+                class: "w-full rounded-lg bg-zinc-700 border border-zinc-600 px-3 py-2 text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500" %>
+          </div>
+
+          <div>
+            <%= f.label :password, class: "block text-sm font-medium text-zinc-300 mb-1" %>
+            <% if @minimum_password_length %>
+              <p class="text-xs text-zinc-400 mb-1"><%= @minimum_password_length %> characters minimum</p>
+            <% end %>
+            <%= f.password_field :password, autocomplete: "new-password",
+                class: "w-full rounded-lg bg-zinc-700 border border-zinc-600 px-3 py-2 text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500" %>
+          </div>
+
+          <div>
+            <%= f.label :password_confirmation, class: "block text-sm font-medium text-zinc-300 mb-1" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password",
+                class: "w-full rounded-lg bg-zinc-700 border border-zinc-600 px-3 py-2 text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500" %>
+          </div>
+
+          <%= f.submit "Sign up",
+              class: "w-full rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-500 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= render "devise/shared/links" %>
+  </div>
+</div>

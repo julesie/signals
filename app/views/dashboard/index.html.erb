@@ -1,178 +1,209 @@
-<div class="w-full space-y-8">
-  <%# Header %>
-  <div>
-    <h1 class="text-3xl font-bold text-gray-900">Signals</h1>
-    <p class="mt-1 text-sm text-gray-500">
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-8">
+    <%# Sync status %>
+    <p class="text-sm text-zinc-400">
       <% if @pipeline_stats[:last_received] %>
         Last sync: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago
       <% else %>
         No data synced yet
       <% end %>
     </p>
-  </div>
 
-  <%# Latest Metrics %>
-  <section>
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Latest Metrics</h2>
-    <% if @latest_metrics.any? %>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <% @latest_metrics.each do |metric| %>
-          <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-sm text-gray-500"><%= metric.metric_name.titleize %></p>
-            <p class="mt-1 text-2xl font-bold text-gray-900">
-              <%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %>
-              <span class="text-sm font-normal text-gray-500"><%= metric.units %></span>
-            </p>
-            <p class="mt-1 text-xs text-gray-400"><%= time_ago_in_words(metric.recorded_at) %> ago</p>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="bg-white rounded-lg shadow p-6 text-center text-gray-400">
-        No metrics yet
-      </div>
-    <% end %>
-  </section>
-
-  <%# Sleep %>
-  <section>
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Sleep</h2>
-    <% if @latest_sleep %>
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-baseline gap-2 mb-4">
-          <span class="text-3xl font-bold text-gray-900"><%= number_with_precision(@latest_sleep.value, precision: 1) %></span>
-          <span class="text-sm text-gray-500">hours of sleep</span>
+    <%# Latest Metrics %>
+    <section>
+      <h2 class="text-lg font-semibold mb-4">Latest Metrics</h2>
+      <% if @latest_metrics.any? %>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <% @latest_metrics.each do |metric| %>
+            <%= render(CardComponent.new) do %>
+              <p class="text-sm text-zinc-400"><%= metric.metric_name.titleize %></p>
+              <p class="mt-1 text-2xl font-bold">
+                <%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %>
+                <span class="text-sm font-normal text-zinc-400"><%= metric.units %></span>
+              </p>
+              <p class="mt-1 text-xs text-zinc-500"><%= time_ago_in_words(metric.recorded_at) %> ago</p>
+            <% end %>
+          <% end %>
         </div>
-
-        <% meta = @latest_sleep.metadata || {} %>
-        <% if meta["sleepStart"].present? || meta["sleepEnd"].present? %>
-          <div class="flex gap-6 text-sm text-gray-600 mb-4">
-            <% if meta["sleepStart"].present? %>
-              <div>
-                <span class="text-gray-400">Asleep:</span>
-                <%= Time.parse(meta["sleepStart"]).strftime("%-I:%M %p") %>
-              </div>
-            <% end %>
-            <% if meta["sleepEnd"].present? %>
-              <div>
-                <span class="text-gray-400">Awake:</span>
-                <%= Time.parse(meta["sleepEnd"]).strftime("%-I:%M %p") %>
-              </div>
-            <% end %>
-            <% if meta["inBed"].present? %>
-              <div>
-                <span class="text-gray-400">In bed:</span>
-                <%= number_with_precision(meta["inBed"], precision: 1) %> hr
-              </div>
-            <% end %>
-          </div>
+      <% else %>
+        <%= render(CardComponent.new) do %>
+          <p class="text-center text-zinc-500">No metrics yet</p>
         <% end %>
+      <% end %>
+    </section>
 
-        <% if meta["core"].present? && meta["deep"].present? && meta["rem"].present? && @latest_sleep.value > 0 %>
-          <% total = @latest_sleep.value.to_f %>
-          <% core_pct = (meta["core"].to_f / total * 100).round %>
-          <% deep_pct = (meta["deep"].to_f / total * 100).round %>
-          <% rem_pct = (meta["rem"].to_f / total * 100).round %>
-          <div class="mb-2">
-            <div class="flex h-4 rounded-full overflow-hidden">
-              <div class="bg-blue-400" style="width: <%= core_pct %>%"></div>
-              <div class="bg-indigo-600" style="width: <%= deep_pct %>%"></div>
-              <div class="bg-purple-500" style="width: <%= rem_pct %>%"></div>
-            </div>
+    <%# Sleep %>
+    <section>
+      <h2 class="text-lg font-semibold mb-4">Sleep</h2>
+      <% if @latest_sleep %>
+        <%= render(CardComponent.new) do %>
+          <div class="flex items-baseline gap-2 mb-4">
+            <span class="text-3xl font-bold"><%= number_with_precision(@latest_sleep.value, precision: 1) %></span>
+            <span class="text-sm text-zinc-400">hours of sleep</span>
           </div>
-          <div class="flex gap-4 text-xs text-gray-500">
-            <div class="flex items-center gap-1">
-              <span class="inline-block w-3 h-3 rounded bg-blue-400"></span>
-              Core <%= number_with_precision(meta["core"], precision: 1) %> hr
+
+          <% meta = @latest_sleep.metadata || {} %>
+          <% if meta["sleepStart"].present? || meta["sleepEnd"].present? %>
+            <div class="flex gap-6 text-sm text-zinc-300 mb-4">
+              <% if meta["sleepStart"].present? %>
+                <div>
+                  <span class="text-zinc-500">Asleep:</span>
+                  <%= Time.parse(meta["sleepStart"]).strftime("%-I:%M %p") %>
+                </div>
+              <% end %>
+              <% if meta["sleepEnd"].present? %>
+                <div>
+                  <span class="text-zinc-500">Awake:</span>
+                  <%= Time.parse(meta["sleepEnd"]).strftime("%-I:%M %p") %>
+                </div>
+              <% end %>
+              <% if meta["inBed"].present? %>
+                <div>
+                  <span class="text-zinc-500">In bed:</span>
+                  <%= number_with_precision(meta["inBed"], precision: 1) %> hr
+                </div>
+              <% end %>
             </div>
-            <div class="flex items-center gap-1">
-              <span class="inline-block w-3 h-3 rounded bg-indigo-600"></span>
-              Deep <%= number_with_precision(meta["deep"], precision: 1) %> hr
+          <% end %>
+
+          <% if meta["core"].present? && meta["deep"].present? && meta["rem"].present? && @latest_sleep.value > 0 %>
+            <% total = @latest_sleep.value.to_f %>
+            <% core_pct = (meta["core"].to_f / total * 100).round %>
+            <% deep_pct = (meta["deep"].to_f / total * 100).round %>
+            <% rem_pct = (meta["rem"].to_f / total * 100).round %>
+            <div class="mb-2">
+              <div class="flex h-4 rounded-full overflow-hidden">
+                <div class="bg-blue-400" style="width: <%= core_pct %>%"></div>
+                <div class="bg-indigo-500" style="width: <%= deep_pct %>%"></div>
+                <div class="bg-purple-400" style="width: <%= rem_pct %>%"></div>
+              </div>
             </div>
-            <div class="flex items-center gap-1">
-              <span class="inline-block w-3 h-3 rounded bg-purple-500"></span>
-              REM <%= number_with_precision(meta["rem"], precision: 1) %> hr
+            <div class="flex gap-4 text-xs text-zinc-400">
+              <div class="flex items-center gap-1">
+                <span class="inline-block w-3 h-3 rounded bg-blue-400"></span>
+                Core <%= number_with_precision(meta["core"], precision: 1) %> hr
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="inline-block w-3 h-3 rounded bg-indigo-500"></span>
+                Deep <%= number_with_precision(meta["deep"], precision: 1) %> hr
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="inline-block w-3 h-3 rounded bg-purple-400"></span>
+                REM <%= number_with_precision(meta["rem"], precision: 1) %> hr
+              </div>
             </div>
-          </div>
+          <% end %>
         <% end %>
-      </div>
-    <% else %>
-      <div class="bg-white rounded-lg shadow p-6 text-center text-gray-400">
-        No sleep data yet
-      </div>
-    <% end %>
-  </section>
+      <% else %>
+        <%= render(CardComponent.new) do %>
+          <p class="text-center text-zinc-500">No sleep data yet</p>
+        <% end %>
+      <% end %>
+    </section>
 
-  <%# Recent Workouts %>
-  <section>
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Workouts</h2>
-    <% if @recent_workouts.any? %>
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Distance</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg HR</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Energy</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <% @recent_workouts.each do |workout| %>
-              <tr>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= workout.workout_type %></td>
-                <td class="px-6 py-4 text-sm text-gray-600"><%= workout.started_at.strftime("%b %-d, %Y %-I:%M %p") %></td>
-                <td class="px-6 py-4 text-sm text-gray-600">
+    <%# Recent Workouts %>
+    <section>
+      <h2 class="text-lg font-semibold mb-4">Recent Workouts</h2>
+      <% if @recent_workouts.any? %>
+        <%# Mobile: stacked cards %>
+        <div class="md:hidden space-y-3">
+          <% @recent_workouts.each do |workout| %>
+            <%= render(CardComponent.new) do %>
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium"><%= workout.workout_type %></span>
+                <span class="text-xs text-zinc-500"><%= workout.started_at.strftime("%b %-d") %></span>
+              </div>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
+                <span>
                   <% hours = workout.duration.to_i / 3600 %>
                   <% minutes = (workout.duration.to_i % 3600) / 60 %>
                   <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                  <% if workout.distance.present? && workout.distance > 0 %>
-                    <%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %>
-                  <% else %>
-                    &mdash;
-                  <% end %>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                  <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
-                  <% if avg_hr.present? %>
-                    <%= avg_hr.to_i %> bpm
-                  <% else %>
-                    &mdash;
-                  <% end %>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                  <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
-                    <%= workout.energy_burned.to_i %> kcal
-                  <% else %>
-                    &mdash;
-                  <% end %>
-                </td>
-              </tr>
+                </span>
+                <% if workout.distance.present? && workout.distance > 0 %>
+                  <span><%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %></span>
+                <% end %>
+                <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
+                <% if avg_hr.present? %>
+                  <span><%= avg_hr.to_i %> bpm</span>
+                <% end %>
+                <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
+                  <span><%= workout.energy_burned.to_i %> kcal</span>
+                <% end %>
+              </div>
             <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <div class="bg-white rounded-lg shadow p-6 text-center text-gray-400">
-        No workouts yet
-      </div>
-    <% end %>
-  </section>
+          <% end %>
+        </div>
 
-  <%# Pipeline Status %>
-  <section>
-    <div class="flex items-center gap-4 text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3">
-      <span><%= @pipeline_stats[:total_payloads] %> payload<%= @pipeline_stats[:total_payloads] == 1 ? "" : "s" %> processed</span>
-      <% if @pipeline_stats[:last_received] %>
-        <span>Last: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago</span>
+        <%# Desktop: table %>
+        <div class="hidden md:block">
+          <%= render(CardComponent.new(flush: true)) do %>
+            <table class="min-w-full divide-y divide-zinc-700">
+              <thead class="bg-zinc-700/50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Duration</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Distance</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Avg HR</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Energy</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-700">
+                <% @recent_workouts.each do |workout| %>
+                  <tr>
+                    <td class="px-6 py-4 text-sm font-medium"><%= workout.workout_type %></td>
+                    <td class="px-6 py-4 text-sm text-zinc-400"><%= workout.started_at.strftime("%b %-d, %Y %-I:%M %p") %></td>
+                    <td class="px-6 py-4 text-sm text-zinc-400">
+                      <% hours = workout.duration.to_i / 3600 %>
+                      <% minutes = (workout.duration.to_i % 3600) / 60 %>
+                      <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-zinc-400">
+                      <% if workout.distance.present? && workout.distance > 0 %>
+                        <%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %>
+                      <% else %>
+                        &mdash;
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-zinc-400">
+                      <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
+                      <% if avg_hr.present? %>
+                        <%= avg_hr.to_i %> bpm
+                      <% else %>
+                        &mdash;
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-zinc-400">
+                      <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
+                        <%= workout.energy_burned.to_i %> kcal
+                      <% else %>
+                        &mdash;
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% end %>
+        </div>
+      <% else %>
+        <%= render(CardComponent.new) do %>
+          <p class="text-center text-zinc-500">No workouts yet</p>
+        <% end %>
       <% end %>
-      <% if @pipeline_stats[:failed_count] > 0 %>
-        <span class="text-red-600 font-medium"><%= @pipeline_stats[:failed_count] %> failed</span>
-      <% end %>
-    </div>
-  </section>
-</div>
+    </section>
+
+    <%# Pipeline Status %>
+    <section>
+      <div class="flex items-center gap-4 text-sm text-zinc-500 bg-zinc-800/50 rounded-lg px-4 py-3">
+        <span><%= @pipeline_stats[:total_payloads] %> payload<%= @pipeline_stats[:total_payloads] == 1 ? "" : "s" %> processed</span>
+        <% if @pipeline_stats[:last_received] %>
+          <span>Last: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago</span>
+        <% end %>
+        <% if @pipeline_stats[:failed_count] > 0 %>
+          <span class="text-red-400 font-medium"><%= @pipeline_stats[:failed_count] %> failed</span>
+        <% end %>
+      </div>
+    </section>
+  </div>
+<% end %>

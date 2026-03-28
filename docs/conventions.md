@@ -22,15 +22,18 @@ To install hooks manually: `bundle exec lefthook install`
 ## Testing
 
 - **Unit and integration tests** are the primary testing layers.
-- **Minimal view-level tests.** Don't test markup unless it encodes important logic.
+- **Minimal view-level tests.** Don't test markup unless it encodes important logic. Smoke tests only — assert pages render successfully and contain key content. Never assert specific CSS classes or HTML structure.
 - **Every test should have clear value.** Prefer a smaller, smarter test suite over comprehensive-but-redundant coverage. If a test doesn't catch a meaningful failure, delete it.
 - **No excessive mocking.** Test real behavior wherever practical.
 - Run tests: `bin/rails test`
 
 ## Frontend
 
-- **Tailwind CSS only.** No custom CSS unless absolutely unavoidable.
-- **Extract components** (partials, ViewComponents, or helpers) whenever HTML patterns repeat. Avoid copy-pasting complex markup.
+- **Tailwind CSS only.** No custom CSS unless absolutely unavoidable. Use Tailwind v4 defaults — no custom config file.
+- **Dark mode is forced** via `<html class="dark">` and `@custom-variant dark` in `application.css`. All views must work on a dark (`bg-zinc-900`) background. Use `zinc` for neutral tones (zinc-100 for text, zinc-400 for muted, zinc-800 for surfaces).
+- **Mobile-first.** Base styles target iPhone. Use `md:` and `lg:` breakpoints to scale up for larger screens. Prefer stacked layouts on mobile over cramped tables or grids.
+- **ViewComponents** for reusable UI patterns. Place components in `app/components/`. Name them `<Name>Component` (e.g., `CardComponent`). Each component gets a `.rb` file and `.html.erb` template in the same directory.
+- **Lookbook previews** for every ViewComponent. Place previews in `test/components/previews/`. Name them `<Name>ComponentPreview`. Lookbook is available at `/lookbook` in development.
 - **Hotwire** (Turbo + Stimulus) for interactivity — no heavy JS frameworks.
 
 ## Git
