@@ -18,6 +18,7 @@ AI health coach — HealthKit data + markdown training plans + LLM coaching.
 | [docs/background.md](docs/background.md) | Understanding the product vision, roadmap, and domain |
 | [docs/architecture.md](docs/architecture.md) | Making technical decisions, adding dependencies, changing data flow |
 | [docs/conventions.md](docs/conventions.md) | Writing code, tests, views, or commits |
+| [docs/setup.md](docs/setup.md) | Setting up a new development machine |
 | [docs/deployment.md](docs/deployment.md) | Changing infrastructure, env vars, or deploy process |
 | [docs/plans/](docs/plans/) | Design docs and implementation plans for each feature slice |
 
