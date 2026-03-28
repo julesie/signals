@@ -37,6 +37,14 @@ class WorkoutParserTest < ActiveSupport::TestCase
     assert_equal 98, workout.metadata.dig("heartRate", "min")
   end
 
+  test "converts energy_burned from kJ to kcal" do
+    @workouts_data.first["activeEnergyBurned"] = {"qty" => 2030.3, "units" => "kJ"}
+    WorkoutParser.call(@workouts_data)
+
+    workout = Workout.first
+    assert_in_delta 485.5, workout.energy_burned, 0.5
+  end
+
   test "deduplicates on external_id" do
     WorkoutParser.call(@workouts_data)
     result = WorkoutParser.call(@workouts_data)

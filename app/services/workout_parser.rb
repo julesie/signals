@@ -2,6 +2,7 @@ class WorkoutParser
   Result = Struct.new(:created, :skipped, keyword_init: true)
 
   COMMON_FIELDS = %w[id name start end duration location isIndoor].freeze
+  KJ_TO_KCAL = 4.184
 
   def self.call(workouts_data)
     new(workouts_data).call
@@ -29,7 +30,7 @@ class WorkoutParser
           duration: workout_data["duration"],
           distance: workout_data.dig("distance", "qty"),
           distance_units: workout_data.dig("distance", "units"),
-          energy_burned: workout_data.dig("activeEnergyBurned", "qty"),
+          energy_burned: convert_energy(workout_data["activeEnergyBurned"]),
           metadata: build_metadata(workout_data)
         )
         created += 1
@@ -40,6 +41,13 @@ class WorkoutParser
   end
 
   private
+
+  def convert_energy(energy)
+    return nil unless energy
+    qty = energy["qty"]
+    return nil unless qty
+    (energy["units"] == "kJ") ? (qty / KJ_TO_KCAL).round(1) : qty
+  end
 
   def build_metadata(workout_data)
     metadata = workout_data.except(*COMMON_FIELDS)
