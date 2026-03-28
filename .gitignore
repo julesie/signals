@@ -33,6 +33,8 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Ignore personal notes
+/docs/notes
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
