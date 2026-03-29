@@ -1,53 +1,55 @@
 <%= render(PageLayoutComponent.new) do %>
   <div class="space-y-8">
-    <%# Daily suggestion %>
-    <% if @plan&.has_content? %>
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">Today's Suggestion</h2>
-          <div class="flex items-center gap-3">
-            <%= link_to "View plan", plan_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
-            <%= button_to "Regenerate", generate_suggestion_plan_path, method: :post, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
-          </div>
-        </div>
-        <% if @plan.has_suggestion? %>
-          <%= render(CardComponent.new) do %>
-            <div class="text-zinc-300 text-sm">
-              <%= simple_format(@plan.daily_suggestion) %>
-            </div>
-            <% if @plan.suggestion_generated_at %>
-              <p class="mt-3 text-xs text-zinc-500">Generated <%= time_ago_in_words(@plan.suggestion_generated_at) %> ago</p>
+    <%# Today's Suggestion (Turbo Frame — lazy-loaded) %>
+    <section>
+      <turbo-frame id="suggestion" src="<%= dashboard_suggestion_path %>" loading="lazy">
+        <%= render(LoadingSpinnerComponent.new(text: "Generating suggestion...")) %>
+      </turbo-frame>
+    </section>
+
+    <%# Today's Workouts %>
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Today's Workouts</h2>
+        <%= link_to "View all", workouts_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+      </div>
+      <% if @todays_workouts.any? %>
+        <div class="space-y-3">
+          <% @todays_workouts.each do |workout| %>
+            <%= render(CardComponent.new) do %>
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium"><%= workout.workout_type %></span>
+                <span class="text-xs text-zinc-500"><%= workout.started_at.strftime("%-I:%M %p") %></span>
+              </div>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
+                <span>
+                  <% hours = workout.duration.to_i / 3600 %>
+                  <% minutes = (workout.duration.to_i % 3600) / 60 %>
+                  <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
+                </span>
+                <% if workout.distance.present? && workout.distance > 0 %>
+                  <span><%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %></span>
+                <% end %>
+                <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
+                  <span><%= workout.energy_burned.to_i %> kcal</span>
+                <% end %>
+              </div>
             <% end %>
           <% end %>
-        <% else %>
-          <%= render(CardComponent.new) do %>
-            <div class="text-center py-4">
-              <p class="text-zinc-500 mb-3">No suggestion yet.</p>
-              <%= button_to "Generate suggestion", generate_suggestion_plan_path, method: :post, class: "text-sm text-blue-400 hover:text-blue-300" %>
-            </div>
-          <% end %>
-        <% end %>
-      </section>
-    <% elsif @plan && !@plan.has_content? %>
-      <section>
-        <%= render(CardComponent.new) do %>
-          <div class="text-center py-4">
-            <p class="text-zinc-500 mb-2">No fitness plan yet.</p>
-            <%= link_to "Create a plan", edit_plan_path, class: "text-sm text-blue-400 hover:text-blue-300" %>
-            <span class="text-zinc-600 text-sm"> to get daily activity suggestions</span>
-          </div>
-        <% end %>
-      </section>
-    <% end %>
-
-    <%# Sync status %>
-    <p class="text-sm text-zinc-400">
-      <% if @pipeline_stats[:last_received] %>
-        Last sync: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago
+        </div>
       <% else %>
-        No data synced yet
+        <%= render(CardComponent.new) do %>
+          <p class="text-center text-zinc-500">No workouts recorded today.</p>
+        <% end %>
       <% end %>
-    </p>
+    </section>
+
+    <%# Plan Adherence (Turbo Frame — lazy-loaded) %>
+    <section>
+      <turbo-frame id="adherence" src="<%= dashboard_adherence_path %>" loading="lazy">
+        <%= render(LoadingSpinnerComponent.new(text: "Analyzing plan adherence...")) %>
+      </turbo-frame>
+    </section>
 
     <%# Latest Metrics %>
     <section>
@@ -141,105 +143,15 @@
       <% end %>
     </section>
 
-    <%# Today's Workouts %>
-    <section>
-      <h2 class="text-lg font-semibold mb-4">Today's Workouts</h2>
-      <% if @todays_workouts&.any? %>
-        <%# Mobile: stacked cards %>
-        <div class="md:hidden space-y-3">
-          <% @todays_workouts.each do |workout| %>
-            <%= render(CardComponent.new) do %>
-              <div class="flex items-center justify-between mb-2">
-                <span class="font-medium"><%= workout.workout_type %></span>
-                <span class="text-xs text-zinc-500"><%= workout.started_at.strftime("%b %-d") %></span>
-              </div>
-              <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
-                <span>
-                  <% hours = workout.duration.to_i / 3600 %>
-                  <% minutes = (workout.duration.to_i % 3600) / 60 %>
-                  <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
-                </span>
-                <% if workout.distance.present? && workout.distance > 0 %>
-                  <span><%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %></span>
-                <% end %>
-                <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
-                <% if avg_hr.present? %>
-                  <span><%= avg_hr.to_i %> bpm</span>
-                <% end %>
-                <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
-                  <span><%= workout.energy_burned.to_i %> kcal</span>
-                <% end %>
-              </div>
-            <% end %>
-          <% end %>
-        </div>
-
-        <%# Desktop: table %>
-        <div class="hidden md:block">
-          <%= render(CardComponent.new(flush: true)) do %>
-            <table class="min-w-full divide-y divide-zinc-700">
-              <thead class="bg-zinc-700/50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Type</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Date</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Duration</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Distance</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Avg HR</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Energy</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-zinc-700">
-                <% @todays_workouts.each do |workout| %>
-                  <tr>
-                    <td class="px-6 py-4 text-sm font-medium"><%= workout.workout_type %></td>
-                    <td class="px-6 py-4 text-sm text-zinc-400"><%= workout.started_at.strftime("%b %-d, %Y %-I:%M %p") %></td>
-                    <td class="px-6 py-4 text-sm text-zinc-400">
-                      <% hours = workout.duration.to_i / 3600 %>
-                      <% minutes = (workout.duration.to_i % 3600) / 60 %>
-                      <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-zinc-400">
-                      <% if workout.distance.present? && workout.distance > 0 %>
-                        <%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %>
-                      <% else %>
-                        &mdash;
-                      <% end %>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-zinc-400">
-                      <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
-                      <% if avg_hr.present? %>
-                        <%= avg_hr.to_i %> bpm
-                      <% else %>
-                        &mdash;
-                      <% end %>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-zinc-400">
-                      <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
-                        <%= workout.energy_burned.to_i %> kcal
-                      <% else %>
-                        &mdash;
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          <% end %>
-        </div>
-      <% else %>
-        <%= render(CardComponent.new) do %>
-          <p class="text-center text-zinc-500">No workouts yet</p>
-        <% end %>
-      <% end %>
-    </section>
-
-    <%# Pipeline Status %>
+    <%# Sync / Pipeline Status %>
     <section>
       <div class="flex items-center gap-4 text-sm text-zinc-500 bg-zinc-800/50 rounded-lg px-4 py-3">
-        <span><%= @pipeline_stats[:total_payloads] %> payload<%= @pipeline_stats[:total_payloads] == 1 ? "" : "s" %> processed</span>
         <% if @pipeline_stats[:last_received] %>
-          <span>Last: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago</span>
+          <span>Last sync: <%= time_ago_in_words(@pipeline_stats[:last_received]) %> ago</span>
+        <% else %>
+          <span>No data synced yet</span>
         <% end %>
+        <span><%= @pipeline_stats[:total_payloads] %> payload<%= @pipeline_stats[:total_payloads] == 1 ? "" : "s" %> processed</span>
         <% if @pipeline_stats[:failed_count] > 0 %>
           <span class="text-red-400 font-medium"><%= @pipeline_stats[:failed_count] %> failed</span>
         <% end %>
