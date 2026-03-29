@@ -52,4 +52,23 @@ class WorkoutsTest < ActionDispatch::IntegrationTest
     get workouts_path
     assert_response :redirect
   end
+
+  test "update saves workout notes" do
+    patch workout_path(@run), params: {workout: {notes: "Knee felt tight"}}
+    assert_response :redirect
+    assert_equal "Knee felt tight", @run.reload.notes
+  end
+
+  test "update rejects notes exceeding 280 characters" do
+    patch workout_path(@run), params: {workout: {notes: "a" * 281}}
+    assert_response :redirect
+    assert_nil @run.reload.notes
+  end
+
+  test "update requires authentication" do
+    sign_out @user
+    patch workout_path(@run), params: {workout: {notes: "test"}}
+    assert_response :redirect
+    assert_nil @run.reload.notes
+  end
 end

@@ -73,7 +73,9 @@ class PlanAdherenceGenerator
       parts << w.workout_type
       parts << "#{(w.duration / 60.0).round} min"
       parts << "#{w.energy_burned.round} kcal" if w.energy_burned.present?
-      "- #{parts.join(", ")}"
+      line = "- #{parts.join(", ")}"
+      line << " — \"#{w.notes}\"" if w.notes.present?
+      line
     }.join("\n")
   end
 

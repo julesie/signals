@@ -49,6 +49,26 @@ class PlanAdherenceGeneratorTest < ActiveSupport::TestCase
     assert_includes captured_prompt, "Last 30 Days"
   end
 
+  test "includes workout notes in the context when present" do
+    Workout.create!(
+      external_id: "adherence-noted",
+      workout_type: "Running",
+      started_at: 2.days.ago,
+      ended_at: 2.days.ago + 30.minutes,
+      duration: 1800,
+      energy_burned: 300,
+      notes: "Felt strong today"
+    )
+
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanAdherenceGenerator.call(@plan)
+    end
+
+    assert_includes captured_prompt, "Felt strong today"
+  end
+
   private
 
   def stub_llm_chat(response, capture: nil, &block)
