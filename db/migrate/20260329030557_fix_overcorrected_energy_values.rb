@@ -17,7 +17,31 @@ class FixOvercorrectedEnergyValues < ActiveRecord::Migration[8.1]
       )
     SQL
 
-    # 2. Fix energy values on webhook records only.
+    # 2. Fix CSV timestamps. The CSV import stored UTC times as local,
+    #    so all timestamps are 8 hours early (PST offset). Shift them
+    #    forward to correct local time. All CSV records are from the
+    #    PST period (Feb-Mar before DST on Mar 8), except a few after
+    #    Mar 8 which should use PDT (7 hours). But since DST changed
+    #    Mar 8, we need to handle both offsets.
+    #    Before Mar 8: add 8 hours (PST = UTC-8)
+    #    Mar 8 onwards: add 7 hours (PDT = UTC-7)
+    execute <<~SQL
+      UPDATE workouts
+      SET started_at = started_at + INTERVAL '8 hours',
+          ended_at = ended_at + INTERVAL '8 hours'
+      WHERE external_id LIKE 'csv-%'
+      AND started_at < '2026-03-08'
+    SQL
+
+    execute <<~SQL
+      UPDATE workouts
+      SET started_at = started_at + INTERVAL '7 hours',
+          ended_at = ended_at + INTERVAL '7 hours'
+      WHERE external_id LIKE 'csv-%'
+      AND started_at >= '2026-03-08'
+    SQL
+
+    # 3. Fix energy values on webhook records only.
     #    The previous fix migration (20260329023656) multiplied ALL
     #    pre-migration records by 4.184. For webhook records, this
     #    restored raw kJ values (they need dividing). For CSV-only
