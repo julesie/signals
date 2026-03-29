@@ -1,0 +1,56 @@
+<turbo-frame id="adherence">
+  <% if @plan&.has_content? %>
+    <% if @result && !@result.success %>
+      <%= render(CardComponent.new) do %>
+        <div class="text-center py-4">
+          <p class="text-red-400 mb-3">Could not generate adherence summary. Try again later.</p>
+          <%= button_to "Retry", dashboard_adherence_path, method: :post, class: "text-sm text-blue-400 hover:text-blue-300" %>
+        </div>
+      <% end %>
+    <% else %>
+      <%# AI Narrative %>
+      <% if @plan.adherence_summary.present? %>
+        <%= render(CardComponent.new) do %>
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Plan Adherence</h2>
+            <%= button_to "Regenerate", dashboard_adherence_path, method: :post, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+          </div>
+          <div class="text-zinc-300 text-sm">
+            <%= simple_format(@plan.adherence_summary) %>
+          </div>
+          <% if @plan.adherence_summary_generated_at %>
+            <p class="mt-3 text-xs text-zinc-500">Generated <%= time_ago_in_words(@plan.adherence_summary_generated_at) %> ago</p>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%# Active Calories Bar Chart %>
+      <% if @active_calories_days.present? %>
+        <%= render(CardComponent.new) do %>
+          <h3 class="text-sm font-medium text-zinc-400 mb-4">Active Calories — Last 7 Days</h3>
+          <div class="relative h-40">
+            <%# Goal line %>
+            <% goal_pct = (DashboardController::ACTIVE_CALORIES_GOAL.to_f / @calories_max * 100).round %>
+            <div class="absolute w-full border-t border-dashed border-green-500/50" style="bottom: <%= goal_pct %>%">
+              <span class="absolute -top-4 right-0 text-xs text-green-500/70"><%= DashboardController::ACTIVE_CALORIES_GOAL %> kcal</span>
+            </div>
+
+            <%# Bars %>
+            <div class="flex items-end justify-between h-full gap-2">
+              <% @active_calories_days.each do |day| %>
+                <% bar_pct = @calories_max > 0 ? (day[:calories].to_f / @calories_max * 100).round : 0 %>
+                <div class="flex-1 flex flex-col items-center">
+                  <div class="w-full rounded-t <%= day[:calories] >= DashboardController::ACTIVE_CALORIES_GOAL ? 'bg-green-500' : 'bg-blue-500' %>"
+                       style="height: <%= bar_pct %>%"
+                       title="<%= day[:calories] %> kcal">
+                  </div>
+                  <span class="text-xs text-zinc-500 mt-1"><%= day[:date].strftime("%a") %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</turbo-frame>

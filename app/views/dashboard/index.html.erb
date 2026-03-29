@@ -141,13 +141,13 @@
       <% end %>
     </section>
 
-    <%# Recent Workouts %>
+    <%# Today's Workouts %>
     <section>
-      <h2 class="text-lg font-semibold mb-4">Recent Workouts</h2>
-      <% if @recent_workouts.any? %>
+      <h2 class="text-lg font-semibold mb-4">Today's Workouts</h2>
+      <% if @todays_workouts&.any? %>
         <%# Mobile: stacked cards %>
         <div class="md:hidden space-y-3">
-          <% @recent_workouts.each do |workout| %>
+          <% @todays_workouts.each do |workout| %>
             <%= render(CardComponent.new) do %>
               <div class="flex items-center justify-between mb-2">
                 <span class="font-medium"><%= workout.workout_type %></span>
@@ -189,7 +189,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-zinc-700">
-                <% @recent_workouts.each do |workout| %>
+                <% @todays_workouts.each do |workout| %>
                   <tr>
                     <td class="px-6 py-4 text-sm font-medium"><%= workout.workout_type %></td>
                     <td class="px-6 py-4 text-sm text-zinc-400"><%= workout.started_at.strftime("%b %-d, %Y %-I:%M %p") %></td>
