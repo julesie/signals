@@ -7,11 +7,9 @@ databases:
 services:
   - type: web
     name: signals
-    runtime: ruby
     plan: free
-    buildCommand: "./bin/render-build.sh"
-    preDeployCommand: "bundle exec rails db:migrate && bundle exec rails db:seed"
-    startCommand: "bundle exec puma -C config/puma.rb"
+    dockerfilePath: ./Dockerfile
+    preDeployCommand: "bundle exec rails db:migrate"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -22,4 +20,6 @@ services:
       - key: RAILS_ENV
         value: production
       - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: SOLID_QUEUE_IN_PUMA
         value: "true"
