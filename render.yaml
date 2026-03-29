@@ -7,9 +7,9 @@ databases:
 services:
   - type: web
     name: signals
+    runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    preDeployCommand: "bundle exec rails db:migrate"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
