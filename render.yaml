@@ -10,7 +10,7 @@ services:
     runtime: docker
     plan: starter
     dockerfilePath: ./Dockerfile
-    preDeployCommand: "bundle exec rails db:prepare db:schema:load:queue db:schema:load:cache"
+    preDeployCommand: "DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rails db:prepare db:schema:load:queue db:schema:load:cache"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
