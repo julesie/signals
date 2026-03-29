@@ -39,3 +39,6 @@
 
 # OS files
 .DS_Store
+
+# Obsidian notes symlink
+/docs/notes
