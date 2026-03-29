@@ -24,3 +24,5 @@ services:
         value: "true"
       - key: SOLID_QUEUE_IN_PUMA
         value: "true"
+      - key: WEB_CONCURRENCY
+        value: "0"
