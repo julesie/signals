@@ -59,7 +59,7 @@
                   <% bar_pct = @calories_max > 0 ? (day[:calories].to_f / @calories_max * 100).round : 0 %>
                   <% bar_pct = [bar_pct, 3].max if day[:calories] > 0 %>
                   <% date_str = day[:date].to_s %>
-                  <%= link_to workouts_path(from: date_str, to: date_str), class: "flex-1 flex flex-col items-center h-full justify-end no-underline" do %>
+                  <%= link_to workouts_path(from: date_str, to: date_str), class: "flex-1 flex flex-col items-center h-full justify-end no-underline", data: { turbo_frame: "_top" } do %>
                     <div class="w-full rounded-t relative flex items-end justify-center <%= day[:calories] >= DashboardController::ACTIVE_CALORIES_GOAL ? 'bg-green-500' : 'bg-blue-500' %>"
                          style="height: <%= bar_pct %>%;">
                       <% if day[:calories] > 0 %>
