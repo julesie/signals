@@ -45,25 +45,34 @@
         <% if @active_calories_days.present? %>
           <%= render(CardComponent.new) do %>
             <h3 class="text-sm font-medium text-zinc-400 mb-4">Active Calories — Last 7 Days</h3>
-            <div class="relative" style="height: 160px;">
-              <%# Goal line %>
-              <% goal_pct = (DashboardController::ACTIVE_CALORIES_GOAL.to_f / @calories_max * 100).round %>
-              <div class="absolute w-full border-t border-dashed border-green-500/50 z-10" style="bottom: <%= goal_pct %>%;">
+            <div class="relative" style="height: 180px;">
+              <%# Goal line — positioned within the bar area (excludes label row) %>
+              <% chart_height = 156 %>
+              <% goal_px = (@calories_max > 0 ? (DashboardController::ACTIVE_CALORIES_GOAL.to_f / @calories_max * chart_height).round : 0) %>
+              <div class="absolute w-full border-t border-dashed border-green-500/50 z-10" style="bottom: <%= goal_px + 24 %>px;">
                 <span class="absolute -top-4 right-0 text-xs text-green-500/70"><%= DashboardController::ACTIVE_CALORIES_GOAL %> kcal</span>
               </div>
 
               <%# Bars %>
-              <div class="flex items-end h-full gap-2">
+              <div class="flex items-end gap-2" style="height: <%= chart_height %>px;">
                 <% @active_calories_days.each do |day| %>
                   <% bar_pct = @calories_max > 0 ? (day[:calories].to_f / @calories_max * 100).round : 0 %>
-                  <% bar_pct = [bar_pct, 2].max if day[:calories] > 0 %>
-                  <div class="flex-1 flex flex-col items-center h-full justify-end">
-                    <div class="w-full rounded-t <%= day[:calories] >= DashboardController::ACTIVE_CALORIES_GOAL ? 'bg-green-500' : 'bg-blue-500' %>"
-                         style="height: <%= bar_pct %>%;"
-                         title="<%= day[:calories] %> kcal">
+                  <% bar_pct = [bar_pct, 3].max if day[:calories] > 0 %>
+                  <% date_str = day[:date].to_s %>
+                  <%= link_to workouts_path(from: date_str, to: date_str), class: "flex-1 flex flex-col items-center h-full justify-end no-underline" do %>
+                    <div class="w-full rounded-t relative flex items-end justify-center <%= day[:calories] >= DashboardController::ACTIVE_CALORIES_GOAL ? 'bg-green-500' : 'bg-blue-500' %>"
+                         style="height: <%= bar_pct %>%;">
+                      <% if day[:calories] > 0 %>
+                        <span class="text-xs font-medium text-white pb-1"><%= day[:calories] %></span>
+                      <% end %>
                     </div>
-                    <span class="text-xs text-zinc-500 mt-2 flex-shrink-0"><%= day[:date].strftime("%a") %></span>
-                  </div>
+                  <% end %>
+                <% end %>
+              </div>
+              <%# Day labels %>
+              <div class="flex gap-2 mt-1">
+                <% @active_calories_days.each do |day| %>
+                  <span class="flex-1 text-center text-xs text-zinc-500"><%= day[:date].strftime("%a") %></span>
                 <% end %>
               </div>
             </div>
