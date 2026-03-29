@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_003111) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_020334) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_003111) do
   end
 
   create_table "plans", force: :cascade do |t|
+    t.text "adherence_summary"
+    t.datetime "adherence_summary_generated_at"
     t.text "content"
     t.datetime "created_at", null: false
     t.text "daily_suggestion"
