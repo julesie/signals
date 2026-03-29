@@ -1,13 +1,14 @@
 databases:
   - name: signals-db
-    plan: free
+    plan: starter
     databaseName: signals
     user: signals
 
 services:
   - type: web
     name: signals
-    plan: free
+    runtime: docker
+    plan: starter
     dockerfilePath: ./Dockerfile
     preDeployCommand: "bundle exec rails db:migrate"
     envVars:
