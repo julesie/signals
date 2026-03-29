@@ -1,0 +1,37 @@
+<div class="flex items-center justify-between mb-2">
+  <span class="font-medium"><%= workout.workout_type %></span>
+  <span class="text-xs text-zinc-500"><%= workout.started_at.strftime("%-I:%M %p") %></span>
+</div>
+<div class="flex items-center justify-between gap-2">
+  <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
+    <span>
+      <% hours = workout.duration.to_i / 3600 %>
+      <% minutes = (workout.duration.to_i % 3600) / 60 %>
+      <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
+    </span>
+    <% if workout.distance.present? && workout.distance > 0 %>
+      <span><%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %></span>
+    <% end %>
+    <% avg_hr = workout.metadata&.dig("heartRate", "avg") %>
+    <% if avg_hr.present? %>
+      <span><%= avg_hr.to_i %> bpm</span>
+    <% end %>
+    <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
+      <span><%= workout.energy_burned.to_i %> kcal</span>
+    <% end %>
+  </div>
+  <button type="button"
+          data-action="notes-modal#open"
+          data-notes="<%= workout.notes %>"
+          data-url="<%= workout_path(workout) %>"
+          data-workout-label="<%= "#{workout.workout_type} — #{workout.started_at.strftime('%b %-d, %-I:%M %p')}" %>"
+          class="text-zinc-500 hover:text-zinc-300 shrink-0"
+          title="<%= workout.notes.present? ? 'Edit note' : 'Add note' %>">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+    </svg>
+  </button>
+</div>
+<% if workout.notes.present? %>
+  <p class="text-xs text-zinc-500 italic mt-2 truncate">"<%= truncate(workout.notes, length: 60) %>"</p>
+<% end %>

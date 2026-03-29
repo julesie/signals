@@ -16,28 +16,13 @@
         <%= link_to "View all", workouts_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
       </div>
       <% if @todays_workouts.any? %>
-        <div class="space-y-3">
+        <div class="space-y-3" data-controller="modal notes-modal">
           <% @todays_workouts.each do |workout| %>
             <%= render(CardComponent.new) do %>
-              <div class="flex items-center justify-between mb-2">
-                <span class="font-medium"><%= workout.workout_type %></span>
-                <span class="text-xs text-zinc-500"><%= workout.started_at.strftime("%-I:%M %p") %></span>
-              </div>
-              <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
-                <span>
-                  <% hours = workout.duration.to_i / 3600 %>
-                  <% minutes = (workout.duration.to_i % 3600) / 60 %>
-                  <%= hours > 0 ? "#{hours}h #{minutes}m" : "#{minutes}m" %>
-                </span>
-                <% if workout.distance.present? && workout.distance > 0 %>
-                  <span><%= number_with_precision(workout.distance, precision: 1, strip_insignificant_zeros: true) %> <%= workout.distance_units %></span>
-                <% end %>
-                <% if workout.energy_burned.present? && workout.energy_burned > 0 %>
-                  <span><%= workout.energy_burned.to_i %> kcal</span>
-                <% end %>
-              </div>
+              <%= render "workouts/workout_card_content", workout: workout %>
             <% end %>
           <% end %>
+          <%= render "workouts/notes_dialog" %>
         </div>
       <% else %>
         <%= render(CardComponent.new) do %>

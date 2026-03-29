@@ -20,4 +20,19 @@ class WorkoutsController < ApplicationController
     @workouts = workouts.limit(PER_PAGE).offset((@page - 1) * PER_PAGE)
     @total_pages = (@total_count.to_f / PER_PAGE).ceil
   end
+
+  def update
+    @workout = Workout.find(params[:id])
+    if @workout.update(workout_params)
+      redirect_back fallback_location: workouts_path, notice: "Note saved."
+    else
+      redirect_back fallback_location: workouts_path, alert: @workout.errors.full_messages.join(", ")
+    end
+  end
+
+  private
+
+  def workout_params
+    params.require(:workout).permit(:notes)
+  end
 end

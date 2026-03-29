@@ -82,6 +82,62 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
     assert_includes captured_prompt, "Traditional Strength Training"
   end
 
+  test "includes workout notes in the context when present" do
+    Workout.create!(
+      external_id: "noted-workout",
+      workout_type: "Running",
+      started_at: 2.days.ago,
+      ended_at: 2.days.ago + 30.minutes,
+      duration: 1800,
+      notes: "Knee felt tight on hills"
+    )
+
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanSuggestionGenerator.call(@plan)
+    end
+
+    assert_includes captured_prompt, "Knee felt tight on hills"
+  end
+
+  test "includes today's workout notes in the context" do
+    Workout.create!(
+      external_id: "today-noted",
+      workout_type: "Running",
+      started_at: 1.hour.ago,
+      ended_at: Time.current,
+      duration: 1800,
+      notes: "Easy recovery pace"
+    )
+
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanSuggestionGenerator.call(@plan)
+    end
+
+    assert_includes captured_prompt, "Easy recovery pace"
+  end
+
+  test "omits notes from context when not present" do
+    Workout.create!(
+      external_id: "no-note-workout",
+      workout_type: "Running",
+      started_at: 2.days.ago,
+      ended_at: 2.days.ago + 30.minutes,
+      duration: 1800
+    )
+
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanSuggestionGenerator.call(@plan)
+    end
+
+    refute_match(/— "/, captured_prompt)
+  end
+
   test "context says no workouts today when none exist" do
     captured_prompt = nil
 

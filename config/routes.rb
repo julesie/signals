@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   get "dashboard/adherence", to: "dashboard#adherence"
   post "dashboard/adherence", to: "dashboard#regenerate_adherence", as: nil
 
-  resources :workouts, only: [:index]
+  resources :workouts, only: [:index, :update]
 
   root "dashboard#index"
 end

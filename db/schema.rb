@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_030557) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_191222) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,6 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_030557) do
     t.decimal "energy_burned"
     t.string "external_id", null: false
     t.jsonb "metadata"
+    t.text "notes"
     t.datetime "started_at", null: false
     t.datetime "updated_at", null: false
     t.string "workout_type", null: false

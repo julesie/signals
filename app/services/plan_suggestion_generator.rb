@@ -72,7 +72,9 @@ class PlanSuggestionGenerator
       parts << "#{(w.duration / 60.0).round} min"
       parts << "#{w.distance} #{w.distance_units}" if w.distance.present?
       parts << "#{w.energy_burned.round} kcal" if w.energy_burned.present?
-      "- #{parts.join(", ")}"
+      line = "- #{parts.join(", ")}"
+      line << " — \"#{w.notes}\"" if w.notes.present?
+      line
     }.join("\n")
   end
 
@@ -84,7 +86,9 @@ class PlanSuggestionGenerator
       parts = [w.workout_type]
       parts << "#{(w.duration / 60.0).round} min"
       parts << "#{w.energy_burned.round} kcal" if w.energy_burned.present?
-      "- #{parts.join(", ")}"
+      line = "- #{parts.join(", ")}"
+      line << " — \"#{w.notes}\"" if w.notes.present?
+      line
     }.join("\n")
   end
 
