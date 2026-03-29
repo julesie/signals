@@ -17,13 +17,16 @@ class FixOvercorrectedEnergyValues < ActiveRecord::Migration[8.1]
       )
     SQL
 
-    # 2. Fix energy values on remaining pre-migration records.
-    #    Previous fix migration multiplied by 4.184, restoring raw kJ
-    #    instead of the correct kcal. Divide by 4.184 to get kcal.
+    # 2. Fix energy values on webhook records only.
+    #    The previous fix migration (20260329023656) multiplied ALL
+    #    pre-migration records by 4.184. For webhook records, this
+    #    restored raw kJ values (they need dividing). For CSV-only
+    #    records, it correctly restored kcal (leave them alone).
     execute <<~SQL
       UPDATE workouts
       SET energy_burned = ROUND(energy_burned / 4.184, 1)
       WHERE energy_burned IS NOT NULL
+      AND external_id NOT LIKE 'csv-%'
       AND created_at < '2026-03-28 22:24:06 UTC'
     SQL
   end
@@ -33,6 +36,7 @@ class FixOvercorrectedEnergyValues < ActiveRecord::Migration[8.1]
       UPDATE workouts
       SET energy_burned = ROUND(energy_burned * 4.184, 1)
       WHERE energy_burned IS NOT NULL
+      AND external_id NOT LIKE 'csv-%'
       AND created_at < '2026-03-28 22:24:06 UTC'
     SQL
 
