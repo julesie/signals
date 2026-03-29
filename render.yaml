@@ -10,7 +10,7 @@ services:
     runtime: docker
     plan: starter
     dockerfilePath: ./Dockerfile
-    preDeployCommand: "bundle exec rails db:migrate"
+    preDeployCommand: "bundle exec rails db:prepare"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
