@@ -1,0 +1,11 @@
+with_content:
+  user: one
+  content: "Run 3x/week, strength training 2x/week, rest on weekends."
+  daily_suggestion: "Today is a good day for a 5K easy run."
+  suggestion_generated_at: <%= 1.hour.ago.to_fs(:db) %>
+
+blank:
+  user: two
+  content:
+  daily_suggestion:
+  suggestion_generated_at:

@@ -2,6 +2,7 @@ class DashboardController < ApplicationController
   METRIC_TYPES = %w[weight body_fat_percentage vo2_max resting_heart_rate heart_rate_variability step_count active_energy dietary_energy].freeze
 
   def index
+    @plan = current_user.plan
     @latest_metrics = METRIC_TYPES.filter_map do |name|
       HealthMetric.where(metric_name: name).order(recorded_at: :desc).first
     end
