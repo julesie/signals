@@ -7,6 +7,11 @@ class MetricsParser
     environmental_audio_exposure headphone_audio_exposure
   ].freeze
 
+  # Health Auto Export sends metric names that differ from our canonical names
+  NAME_MAP = {
+    "weight_body_mass" => "weight"
+  }.freeze
+
   KJ_TO_KCAL_METRICS = %w[active_energy basal_energy_burned].freeze
   KJ_TO_KCAL = 4.184
 
@@ -24,7 +29,8 @@ class MetricsParser
     skipped = 0
 
     @metrics_data.each do |metric_entry|
-      name = metric_entry["name"]
+      raw_name = metric_entry["name"]
+      name = NAME_MAP.fetch(raw_name, raw_name)
       next if IGNORED_METRICS.include?(name)
 
       units = metric_entry["units"]

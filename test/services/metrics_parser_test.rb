@@ -64,6 +64,17 @@ class MetricsParserTest < ActiveSupport::TestCase
     assert_in_delta 1000.0, metric.value, 0.1
   end
 
+  test "normalizes weight_body_mass to weight" do
+    data = [{"name" => "weight_body_mass", "units" => "kg",
+             "data" => [{"qty" => 70.5, "date" => "2026-03-14 00:00:00 -0800"}]}]
+    result = MetricsParser.call(data)
+
+    assert_equal 1, result.created
+    metric = HealthMetric.find_by(metric_name: "weight")
+    assert_equal 70.5, metric.value
+    assert_nil HealthMetric.find_by(metric_name: "weight_body_mass")
+  end
+
   test "ignores excluded metrics" do
     ignored = [{"name" => "time_in_daylight", "units" => "min",
                 "data" => [{"qty" => 30, "date" => "2026-03-14 00:00:00 -0800"}]}]
