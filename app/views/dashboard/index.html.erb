@@ -1,16 +1,18 @@
 <%= render(PageLayoutComponent.new) do %>
   <div class="space-y-8">
-    <%# Today's Suggestion (Turbo Frame — lazy-loaded) %>
+    <h1 class="text-2xl font-bold">Today</h1>
+
+    <%# Suggestion (Turbo Frame — lazy-loaded) %>
     <section>
       <turbo-frame id="suggestion" src="<%= dashboard_suggestion_path %>" loading="lazy">
         <%= render(LoadingSpinnerComponent.new(text: "Generating suggestion...")) %>
       </turbo-frame>
     </section>
 
-    <%# Today's Workouts %>
+    <%# Workouts %>
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold">Today's Workouts</h2>
+        <h2 class="text-lg font-semibold">Workouts</h2>
         <%= link_to "View all", workouts_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
       </div>
       <% if @todays_workouts.any? %>
@@ -42,13 +44,6 @@
           <p class="text-center text-zinc-500">No workouts recorded today.</p>
         <% end %>
       <% end %>
-    </section>
-
-    <%# Plan Adherence (Turbo Frame — lazy-loaded) %>
-    <section>
-      <turbo-frame id="adherence" src="<%= dashboard_adherence_path %>" loading="lazy">
-        <%= render(LoadingSpinnerComponent.new(text: "Analyzing plan adherence...")) %>
-      </turbo-frame>
     </section>
 
     <%# Latest Metrics %>
@@ -141,6 +136,13 @@
           <p class="text-center text-zinc-500">No sleep data yet</p>
         <% end %>
       <% end %>
+    </section>
+
+    <%# Plan Adherence (Turbo Frame — lazy-loaded) %>
+    <section>
+      <turbo-frame id="adherence" src="<%= dashboard_adherence_path %>" loading="lazy">
+        <%= render(LoadingSpinnerComponent.new(text: "Analyzing plan adherence...")) %>
+      </turbo-frame>
     </section>
 
     <%# Sync / Pipeline Status %>

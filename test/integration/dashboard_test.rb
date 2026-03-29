@@ -36,7 +36,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
     )
     get root_path
     assert_match "Running", response.body
-    assert_match "Today's Workouts", response.body
+    assert_match "Workouts", response.body
   end
 
   test "dashboard shows empty state when no workouts today" do

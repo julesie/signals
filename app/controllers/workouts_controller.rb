@@ -13,7 +13,7 @@ class WorkoutsController < ApplicationController
       workouts = workouts.where(started_at: 30.days.ago..)
     end
 
-    @workout_types = workouts.reorder(nil).distinct.pluck(:workout_type).sort
+    @workout_types = Workout.distinct.pluck(:workout_type).sort
 
     @page = (params[:page] || 1).to_i
     @total_count = workouts.count

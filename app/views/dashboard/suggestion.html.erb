@@ -1,6 +1,9 @@
 <turbo-frame id="suggestion">
   <% if @plan&.has_content? %>
     <% if @result && !@result.success %>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Suggestion</h2>
+      </div>
       <%= render(CardComponent.new) do %>
         <div class="text-center py-4">
           <p class="text-red-400 mb-3">Could not generate suggestion. Try again later.</p>
@@ -8,14 +11,14 @@
         </div>
       <% end %>
     <% elsif @plan.has_suggestion? %>
-      <%= render(CardComponent.new) do %>
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-lg font-semibold">Today's Suggestion</h2>
-          <div class="flex items-center gap-3">
-            <%= link_to "View plan", plan_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
-            <%= button_to "Regenerate", dashboard_suggestion_path, method: :post, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
-          </div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Suggestion</h2>
+        <div class="flex items-center gap-3">
+          <%= link_to "View plan", plan_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+          <%= button_to "Regenerate", dashboard_suggestion_path, method: :post, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
         </div>
+      </div>
+      <%= render(CardComponent.new) do %>
         <div class="text-zinc-300 text-sm">
           <%= simple_format(@plan.daily_suggestion) %>
         </div>
@@ -24,6 +27,9 @@
         <% end %>
       <% end %>
     <% else %>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Suggestion</h2>
+      </div>
       <%= render(CardComponent.new) do %>
         <div class="text-center py-4">
           <p class="text-zinc-500 mb-3">No suggestion yet.</p>
@@ -32,6 +38,9 @@
       <% end %>
     <% end %>
   <% elsif @plan && !@plan.has_content? %>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Suggestion</h2>
+    </div>
     <%= render(CardComponent.new) do %>
       <div class="text-center py-4">
         <p class="text-zinc-500 mb-2">No fitness plan yet.</p>

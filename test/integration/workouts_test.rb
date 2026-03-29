@@ -28,8 +28,10 @@ class WorkoutsTest < ActionDispatch::IntegrationTest
   test "workouts index filters by workout type" do
     get workouts_path, params: {workout_type: "Outdoor Run"}
     assert_response :success
-    assert_match "Outdoor Run", response.body
-    assert_no_match "Pool Swim", response.body
+    assert_match "1 workout", response.body
+    # Pool Swim should still appear in the dropdown but not in results
+    assert_select "select[name=workout_type] option[value='Pool Swim']"
+    assert_select "td.px-6", text: "Pool Swim", count: 0
   end
 
   test "workouts index filters by date range" do
