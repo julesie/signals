@@ -62,6 +62,36 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
     assert_includes captured_prompt, "6.2 km"
   end
 
+  test "includes today's completed workouts in the context" do
+    Workout.create!(
+      external_id: "today-strength",
+      workout_type: "Traditional Strength Training",
+      started_at: 3.hours.ago,
+      ended_at: 2.hours.ago,
+      duration: 2400,
+      energy_burned: 350
+    )
+
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanSuggestionGenerator.call(@plan)
+    end
+
+    assert_includes captured_prompt, "Today's Completed Workouts"
+    assert_includes captured_prompt, "Traditional Strength Training"
+  end
+
+  test "context says no workouts today when none exist" do
+    captured_prompt = nil
+
+    stub_llm_chat(@fake_response, capture: ->(prompt) { captured_prompt = prompt }) do
+      PlanSuggestionGenerator.call(@plan)
+    end
+
+    assert_includes captured_prompt, "No workouts completed yet today"
+  end
+
   private
 
   def stub_llm_chat(response, capture: nil, &block)
