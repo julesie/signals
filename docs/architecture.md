@@ -8,7 +8,7 @@
 - **Devise** — single-user email/password auth (registration disabled)
 - **Solid Queue / Solid Cache** — job processing and caching, backed by the primary Postgres database
 - **Hotwire** (Turbo + Stimulus) — frontend interactivity (Phase 2+)
-- **GPT-5 Nano** via OpenAI API — LLM coaching (Phase 3+)
+- **GPT-5 Nano** via `ruby_llm` gem — LLM coaching
 
 ## Data split: markdown vs Postgres
 
@@ -37,6 +37,8 @@ Business logic lives in `app/services/`, keeping models thin:
 - `WorkoutParser` — parses workouts from payload, deduplicates on Health Auto Export UUID
 - `CsvImporter` — one-time historical data import from Health Auto Export CSV files
 - `HealthDataReprocessor` — rebuilds all health data from stored payloads (deduplicates overlapping data)
+- `PlanSuggestionGenerator` — assembles plan + recent activity context, calls LLM, caches daily suggestion
+- `PlanChatService` — single-shot conversational plan editing via LLM
 
 ## Database tables
 
@@ -45,6 +47,7 @@ Business logic lives in `app/services/`, keeping models thin:
 - `health_payloads` — raw webhook JSON, processing status
 - `health_metrics` — non-workout readings, JSONB metadata, deduplicated on `(metric_name, recorded_at)`
 - `workouts` — workout sessions, JSONB for type-specific data, deduplicated on Health Auto Export UUID
+- `plans` — single fitness plan per user (text content, cached daily suggestion), unique on `user_id`
 
 **Phase 4:**
 - `strength_sessions` — exercises, sets, reps, weight, RPE

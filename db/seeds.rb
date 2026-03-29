@@ -1,6 +1,8 @@
-User.find_or_create_by!(email: "jules@julescoleman.com") do |user|
+user = User.find_or_create_by!(email: "jules@julescoleman.com") do |user|
   user.password = "changeme123!"
 end
+
+user.create_plan unless user.plan
 
 # Import historical health data from CSV (idempotent — upserts on re-run)
 metrics_csv = Rails.root.join("db/seed_data/HealthAutoExport-2026-02-13-2026-03-15.csv")

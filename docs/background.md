@@ -85,9 +85,11 @@ Prove HealthKit data flows reliably into Postgres. Deploy to Render with Devise 
 
 Markdown-based training plans stored with version history. "Today" tab showing today's plan alongside actual data from HealthKit. Turbo Streams update the view as new data arrives.
 
-### Phase 3 — LLM coaching
+### Phase 3 — LLM coaching (in progress)
 
-Context assembly service that builds the prompt from plan + recent data + projections + conversation history. Daily morning briefing generation. Chat interface with streaming responses. GPT-5 Nano as default model.
+Context assembly service that builds the prompt from plan + recent data + projections + conversation history. Daily morning briefing generation. Chat interface with streaming responses. GPT-5 Nano as default model via `ruby_llm` gem.
+
+**Completed:** Fitness plan model, single-shot chat plan editing, daily suggestion generation with context assembly (plan + 7 days of workouts/metrics).
 
 ### Phase 4 — Projections + strength logging
 
@@ -102,7 +104,8 @@ Event-driven nudge detection after each data sync: missed workouts, PRs, trend s
 - `DATABASE_URL` — Postgres connection string
 - `RAILS_MASTER_KEY` / `SECRET_KEY_BASE` — Rails encryption
 - `WEBHOOK_AUTH_TOKEN` — Bearer token protecting the webhook endpoint
-- `OPENAI_API_KEY` — for GPT-5 Nano (Phase 3)
+- `OPENAI_API_KEY` — for GPT-5 Nano via `ruby_llm` gem
+- `LLM_MODEL` — optional override for the LLM model (defaults to `gpt-5-nano`)
 
 ## Health Auto Export configuration
 

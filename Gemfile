@@ -41,6 +41,7 @@ gem "image_processing", "~> 1.2"
 
 gem "csv"
 gem "devise"
+gem "ruby_llm"
 gem "view_component"
 
 group :development, :test do
