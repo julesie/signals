@@ -29,6 +29,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
           <%= link_to "Signals", root_path, class: "text-sm font-semibold text-zinc-100 hover:text-white" %>
           <div class="flex items-center gap-4">
+            <%= link_to "Workouts", workouts_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
             <%= link_to "Plan", plan_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
             <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
           </div>

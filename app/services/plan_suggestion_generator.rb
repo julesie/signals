@@ -4,9 +4,11 @@ class PlanSuggestionGenerator
   DEFAULT_MODEL = "gpt-5-nano"
 
   SYSTEM_PROMPT = <<~PROMPT
-    You are a concise fitness coach. Given the user's training plan and their actual activity over the last 7 days, tell them what to do TODAY. Nothing else — no planning ahead, no suggestions for the rest of the week.
+    You are a concise fitness coach. Given the user's training plan, their activity over the last 7 days, and any workouts already completed today, tell them what to do for the rest of TODAY. Nothing else — no planning ahead.
 
-    One short paragraph: what to do today and a brief reason why (based on what they've done recently vs their plan). That's it.
+    If they've already worked out today, acknowledge it and suggest complementary activity or rest — don't suggest an additional full workout.
+
+    One short paragraph: what to do today and a brief reason why. That's it.
   PROMPT
 
   def self.call(plan)
@@ -52,6 +54,9 @@ class PlanSuggestionGenerator
       ## Last 7 Days — Health Metrics
       #{format_metrics}
 
+      ## Today's Completed Workouts
+      #{format_todays_workouts}
+
       ## Today
       #{Date.current.strftime("%A, %B %-d, %Y")}
     CONTEXT
@@ -66,6 +71,18 @@ class PlanSuggestionGenerator
       parts << w.workout_type
       parts << "#{(w.duration / 60.0).round} min"
       parts << "#{w.distance} #{w.distance_units}" if w.distance.present?
+      parts << "#{w.energy_burned.round} kcal" if w.energy_burned.present?
+      "- #{parts.join(", ")}"
+    }.join("\n")
+  end
+
+  def format_todays_workouts
+    workouts = Workout.where(started_at: Date.current.all_day).order(started_at: :asc)
+    return "No workouts completed yet today." if workouts.empty?
+
+    workouts.map { |w|
+      parts = [w.workout_type]
+      parts << "#{(w.duration / 60.0).round} min"
       parts << "#{w.energy_burned.round} kcal" if w.energy_burned.present?
       "- #{parts.join(", ")}"
     }.join("\n")

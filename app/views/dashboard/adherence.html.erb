@@ -1,0 +1,84 @@
+<turbo-frame id="adherence">
+  <% if @plan&.has_content? %>
+    <% if @result && !@result.success %>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Plan Adherence</h2>
+      </div>
+      <%= render(CardComponent.new) do %>
+        <div class="text-center py-4">
+          <p class="text-red-400 mb-3">Could not generate adherence summary. Try again later.</p>
+          <%= button_to "Retry", dashboard_adherence_path, method: :post, class: "text-sm text-blue-400 hover:text-blue-300" %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Plan Adherence</h2>
+        <% if @plan.adherence_summary.present? %>
+          <%= button_to "Regenerate", dashboard_adherence_path, method: :post, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+        <% end %>
+      </div>
+
+      <div class="space-y-4">
+        <%# AI Narrative %>
+        <% if @plan.adherence_summary.present? %>
+          <%= render(CardComponent.new) do %>
+            <div class="text-zinc-300 text-sm space-y-4">
+              <% @plan.adherence_summary.split(/\n\n+/).each do |paragraph| %>
+                <% if paragraph.match?(/\*\*Last \d+ days?:/i) || paragraph.match?(/^Last \d+ days?:/i) %>
+                  <% heading, body = paragraph.split(":", 2) %>
+                  <div>
+                    <p class="font-semibold text-zinc-200 mb-1"><%= heading.gsub(/\*\*/, "") %>:</p>
+                    <p class="text-zinc-400"><%= body&.strip %></p>
+                  </div>
+                <% else %>
+                  <p class="text-zinc-400"><%= paragraph.gsub(/\*\*/, "") %></p>
+                <% end %>
+              <% end %>
+            </div>
+            <% if @plan.adherence_summary_generated_at %>
+              <p class="mt-4 text-xs text-zinc-500">Generated <%= time_ago_in_words(@plan.adherence_summary_generated_at) %> ago</p>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <%# Active Calories Bar Chart %>
+        <% if @active_calories_days.present? %>
+          <%= render(CardComponent.new) do %>
+            <h3 class="text-sm font-medium text-zinc-400 mb-4">Active Calories — Last 7 Days</h3>
+            <div class="relative" style="height: 180px;">
+              <%# Goal line — positioned within the bar area (excludes label row) %>
+              <% chart_height = 156 %>
+              <% goal_px = (@calories_max > 0 ? (DashboardController::ACTIVE_CALORIES_GOAL.to_f / @calories_max * chart_height).round : 0) %>
+              <div class="absolute w-full border-t border-dashed border-green-500/50 z-10" style="bottom: <%= goal_px + 24 %>px;">
+                <span class="absolute -top-4 right-0 text-xs text-green-500/70"><%= DashboardController::ACTIVE_CALORIES_GOAL %> kcal</span>
+              </div>
+
+              <%# Bars %>
+              <div class="flex items-end gap-2" style="height: <%= chart_height %>px;">
+                <% @active_calories_days.each do |day| %>
+                  <% bar_pct = @calories_max > 0 ? (day[:calories].to_f / @calories_max * 100).round : 0 %>
+                  <% bar_pct = [bar_pct, 3].max if day[:calories] > 0 %>
+                  <% date_str = day[:date].to_s %>
+                  <%= link_to workouts_path(from: date_str, to: date_str), class: "flex-1 flex flex-col items-center h-full justify-end no-underline", data: { turbo_frame: "_top" } do %>
+                    <div class="w-full rounded-t relative flex items-end justify-center <%= day[:calories] >= DashboardController::ACTIVE_CALORIES_GOAL ? 'bg-green-500' : 'bg-blue-500' %>"
+                         style="height: <%= bar_pct %>%;">
+                      <% if day[:calories] > 0 %>
+                        <span class="text-xs font-medium text-white pb-1"><%= day[:calories] %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+              <%# Day labels %>
+              <div class="flex gap-2 mt-1">
+                <% @active_calories_days.each do |day| %>
+                  <span class="flex-1 text-center text-xs text-zinc-500"><%= day[:date].strftime("%a") %></span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</turbo-frame>
