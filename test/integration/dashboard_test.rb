@@ -67,4 +67,28 @@ class DashboardTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
   end
+
+  test "suggestion endpoint returns turbo frame" do
+    get dashboard_suggestion_path
+    assert_response :success
+    assert_match "turbo-frame", response.body
+  end
+
+  test "adherence endpoint returns turbo frame" do
+    get dashboard_adherence_path
+    assert_response :success
+    assert_match "turbo-frame", response.body
+  end
+
+  test "regenerate suggestion via POST returns turbo frame" do
+    post dashboard_suggestion_path
+    assert_response :success
+    assert_match "turbo-frame", response.body
+  end
+
+  test "regenerate adherence via POST returns turbo frame" do
+    post dashboard_adherence_path
+    assert_response :success
+    assert_match "turbo-frame", response.body
+  end
 end
