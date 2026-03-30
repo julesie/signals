@@ -1,0 +1,94 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold"><%= @metric_name.titleize %></h1>
+      <%= link_to "All Metrics", metrics_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+    </div>
+
+    <%# Date Range Filter %>
+    <%= render(CardComponent.new) do %>
+      <%= form_tag metric_path(metric_name: @metric_name), method: :get, class: "flex flex-wrap items-end gap-4" do %>
+        <div>
+          <label for="from" class="block text-xs text-zinc-400 mb-1">From</label>
+          <%= date_field_tag :from, params[:from], class: "bg-zinc-700 text-zinc-200 rounded px-3 py-1.5 text-sm" %>
+        </div>
+        <div>
+          <label for="to" class="block text-xs text-zinc-400 mb-1">To</label>
+          <%= date_field_tag :to, params[:to], class: "bg-zinc-700 text-zinc-200 rounded px-3 py-1.5 text-sm" %>
+        </div>
+        <%= submit_tag "Filter", class: "bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-1.5 text-sm cursor-pointer" %>
+        <%= link_to "Clear", metric_path(metric_name: @metric_name), class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+      <% end %>
+    <% end %>
+
+    <%# Chart %>
+    <% if @chart_data.any? %>
+      <%= render(CardComponent.new) do %>
+        <div class="h-64" data-controller="chart" data-chart-data-value="<%= @chart_data.reverse.to_json %>" data-chart-label-value="<%= @metric_name.titleize %>">
+          <canvas data-chart-target="canvas"></canvas>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# History Table %>
+    <%= render(CardComponent.new(flush: true)) do %>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-700 text-zinc-400 text-left">
+            <th class="px-4 py-3">Date</th>
+            <th class="px-4 py-3">Value</th>
+            <th class="px-4 py-3">Units</th>
+          </tr>
+        </thead>
+        <% @metrics.each do |metric| %>
+          <% if @metric_name == "sleep_analysis" && metric.metadata.present? %>
+            <tbody data-controller="toggle" data-action="click->toggle#toggle" class="cursor-pointer">
+              <tr class="border-b border-zinc-700/50 hover:bg-zinc-700/30">
+                <td class="px-4 py-3"><%= metric.recorded_at.strftime("%b %-d, %Y") %></td>
+                <td class="px-4 py-3 font-medium"><%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %></td>
+                <td class="px-4 py-3 text-zinc-400"><span class="flex items-center gap-2"><%= metric.units %><svg class="w-4 h-4 transition-transform" data-toggle-target="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg></span></td>
+              </tr>
+              <tr class="hidden border-b border-zinc-700/50 bg-zinc-800/50" data-toggle-target="content">
+                <td colspan="3" class="px-4 py-3">
+                  <%= render "metrics/sleep_breakdown", metric: metric %>
+                </td>
+              </tr>
+            </tbody>
+          <% else %>
+            <tbody>
+              <tr class="border-b border-zinc-700/50 hover:bg-zinc-700/30">
+                <td class="px-4 py-3"><%= metric.recorded_at.strftime("%b %-d, %Y") %></td>
+                <td class="px-4 py-3 font-medium"><%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %></td>
+                <td class="px-4 py-3 text-zinc-400"><%= metric.units %></td>
+              </tr>
+            </tbody>
+          <% end %>
+        <% end %>
+        <% if @metrics.empty? %>
+          <tbody>
+            <tr>
+              <td colspan="3" class="px-4 py-6 text-center text-zinc-500">No data for this period</td>
+            </tr>
+          </tbody>
+        <% end %>
+      </table>
+    <% end %>
+
+    <%# Pagination %>
+    <% if @total_pages > 1 %>
+      <div class="flex items-center justify-between text-sm text-zinc-400">
+        <div>
+          <% if @page > 1 %>
+            <%= link_to "Previous", metric_path(metric_name: @metric_name, page: @page - 1, from: params[:from], to: params[:to]), class: "hover:text-zinc-200" %>
+          <% end %>
+        </div>
+        <span>Page <%= @page %> of <%= @total_pages %></span>
+        <div>
+          <% if @page < @total_pages %>
+            <%= link_to "Next", metric_path(metric_name: @metric_name, page: @page + 1, from: params[:from], to: params[:to]), class: "hover:text-zinc-200" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

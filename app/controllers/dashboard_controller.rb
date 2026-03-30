@@ -1,14 +1,13 @@
 class DashboardController < ApplicationController
-  METRIC_TYPES = %w[weight body_fat_percentage vo2_max resting_heart_rate heart_rate_variability step_count active_energy dietary_energy].freeze
   ACTIVE_CALORIES_GOAL = 500
 
   def index
     @plan = current_user.plan
     @todays_workouts = current_user.workouts.where(started_at: Date.current.all_day).order(started_at: :desc)
-    @latest_metrics = METRIC_TYPES.filter_map do |name|
-      current_user.health_metrics.where(metric_name: name).order(recorded_at: :desc).first
+    @latest_metrics = (HealthMetric::METRIC_TYPES - ["sleep_analysis"]).filter_map do |name|
+      current_user.health_metrics.by_name(name).order(recorded_at: :desc).first
     end
-    @latest_sleep = current_user.health_metrics.where(metric_name: "sleep_analysis").order(recorded_at: :desc).first
+    @latest_sleep = current_user.health_metrics.by_name("sleep_analysis").order(recorded_at: :desc).first
     @pipeline_stats = {
       total_payloads: current_user.health_payloads.count,
       last_received: current_user.health_payloads.order(created_at: :desc).first&.created_at,

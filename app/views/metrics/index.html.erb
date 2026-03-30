@@ -1,0 +1,26 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-6">
+    <h1 class="text-2xl font-bold">Metrics</h1>
+
+    <% if @latest_metrics.any? %>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% @latest_metrics.each do |metric| %>
+          <%= link_to metric_path(metric_name: metric.metric_name), class: "block hover:ring-2 hover:ring-zinc-600 rounded-lg transition" do %>
+            <%= render(CardComponent.new) do %>
+              <p class="text-sm text-zinc-400"><%= metric.metric_name.titleize %></p>
+              <p class="mt-1 text-2xl font-bold">
+                <%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %>
+                <span class="text-sm font-normal text-zinc-400"><%= metric.units %></span>
+              </p>
+              <p class="mt-1 text-xs text-zinc-500"><%= time_ago_in_words(metric.recorded_at) %> ago</p>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render(CardComponent.new) do %>
+        <p class="text-center text-zinc-500">No metrics yet</p>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
