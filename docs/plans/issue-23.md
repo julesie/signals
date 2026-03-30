@@ -2,7 +2,7 @@
 
 **Issue:** [#23](https://github.com/julesie/signals/issues/23)
 **Branch:** `issue-23-add-food-logging-with-llm-macro-estimation`
-**Status:** Alignment
+**Status:** Done
 **Created:** 2026-03-29
 
 ---
@@ -173,7 +173,51 @@ Build in vertical slices, each independently deployable:
 
 ## Step-by-Step Tasks
 
-*To be populated during execution.*
+### Batch 1: Data layer (Slice 1)
+- [ ] 1.1 Create migration for `foods` table
+- [ ] 1.2 Create migration for `food_logs` table
+- [ ] 1.3 Create migration for `nutrition_profiles` table
+- [ ] 1.4 Create `Food` model with validations, associations, scopes
+- [ ] 1.5 Create `FoodLog` model with validations, associations, mealtime enum, scopes
+- [ ] 1.6 Create `NutritionProfile` model with validations, associations
+- [ ] 1.7 Add `has_many :foods`, `has_many :food_logs`, `has_one :nutrition_profile` to User
+- [ ] 1.8 Create fixtures for foods, food_logs, nutrition_profiles
+- [ ] 1.9 Write model tests
+- [ ] 1.10 Run migrations and verify tests pass
+
+### Batch 2: FoodEstimationService + Nutrition profile settings (Slices 2 & 3)
+- [ ] 2.1 Create `FoodEstimationService` with system prompt, JSON parsing, Result struct
+- [ ] 2.2 Write service tests with stubbed LLM
+- [ ] 2.3 Create `NutritionProfilesController` with edit/update
+- [ ] 2.4 Create nutrition profile edit view
+- [ ] 2.5 Add route for `resource :nutrition_profile`
+- [ ] 2.6 Write integration test for nutrition profile
+
+### Batch 3: Food logging new page + create flow (Slice 4)
+- [ ] 3.1 Create `FoodLogsController` with new, create, quick_add actions
+- [ ] 3.2 Add routes for food_logs
+- [ ] 3.3 Create `/food_logs/new` view with quick-add sections (recent + frequent)
+- [ ] 3.4 Create free-text form with mealtime select + hour dropdown
+- [ ] 3.5 Implement Turbo Frame for LLM estimation flow
+- [ ] 3.6 Implement clone action for quick-adds
+- [ ] 3.7 Implement re-estimate action (pre-fill text field)
+- [ ] 3.8 Add mealtime auto-suggest logic
+- [ ] 3.9 Write integration tests for create flows
+
+### Batch 4: Daily view + edit/delete (Slice 5)
+- [ ] 4.1 Add index action to FoodLogsController with date filtering
+- [ ] 4.2 Create daily view with progress bars and summary line
+- [ ] 4.3 Group entries by mealtime with subtotals
+- [ ] 4.4 Add edit/update actions (updates food_log + food)
+- [ ] 4.5 Add delete action
+- [ ] 4.6 Add "Edit targets" link to nutrition profile
+- [ ] 4.7 Write integration tests for daily view, edit, delete
+
+### Batch 5: Dashboard + navbar integration (Slice 6)
+- [ ] 5.1 Add nutrition summary card to dashboard (progress bars + "Add food" button)
+- [ ] 5.2 Add "Food" link to navbar
+- [ ] 5.3 Load nutrition data in DashboardController
+- [ ] 5.4 Write integration tests for dashboard nutrition section
 
 ## Open Questions / Unknowns
 

@@ -2,6 +2,45 @@
   <div class="space-y-8">
     <h1 class="text-2xl font-bold">Today</h1>
 
+    <%# Nutrition summary %>
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Nutrition</h2>
+        <%= link_to "Add food", new_food_log_path, class: "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg" %>
+      </div>
+
+      <% total_kcal = @todays_food_logs.sum(&:kcal).to_i %>
+      <% total_protein = @todays_food_logs.sum(&:protein).to_i %>
+      <% cal_pct = @nutrition_profile.calorie_target > 0 ? [total_kcal * 100 / @nutrition_profile.calorie_target, 100].min : 0 %>
+      <% pro_pct = @nutrition_profile.protein_target > 0 ? [total_protein * 100 / @nutrition_profile.protein_target, 100].min : 0 %>
+
+      <%= link_to food_logs_path, class: "block hover:ring-2 hover:ring-zinc-600 rounded-lg transition" do %>
+        <%= render(CardComponent.new) do %>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-xs text-zinc-400 mb-1">
+                <span>Calories</span>
+                <span><%= total_kcal %> / <%= @nutrition_profile.calorie_target %> kcal</span>
+              </div>
+              <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: <%= cal_pct %>%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-zinc-400 mb-1">
+                <span>Protein</span>
+                <span><%= total_protein %> / <%= @nutrition_profile.protein_target %>g</span>
+              </div>
+              <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div class="h-full bg-green-500 rounded-full" style="width: <%= pro_pct %>%"></div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </section>
+
     <%# Suggestion (Turbo Frame — lazy-loaded) %>
     <section>
       <turbo-frame id="suggestion" src="<%= dashboard_suggestion_path %>" loading="lazy">

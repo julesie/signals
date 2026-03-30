@@ -5,7 +5,10 @@ class User < ApplicationRecord
     :rememberable, :validatable
 
   has_one :plan, dependent: :destroy
+  has_one :nutrition_profile, dependent: :destroy
   has_many :workouts, dependent: :delete_all
   has_many :health_metrics, dependent: :delete_all
   has_many :health_payloads, dependent: :delete_all
+  has_many :foods, dependent: :destroy
+  has_many :food_logs, dependent: :delete_all
 end

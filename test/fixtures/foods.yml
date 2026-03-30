@@ -1,0 +1,29 @@
+eggs_on_toast:
+  user: one
+  description: "Two eggs on toast with butter"
+  kcal: 350
+  protein: 20.0
+  carbs: 30.0
+  fat: 18.0
+  fibre: 2.0
+  alcohol: 0.0
+
+black_coffee:
+  user: one
+  description: "Black coffee"
+  kcal: 5
+  protein: 0.3
+  carbs: 0.0
+  fat: 0.0
+  fibre: 0.0
+  alcohol: 0.0
+
+chicken_rice:
+  user: one
+  description: "Grilled chicken breast with rice and broccoli"
+  kcal: 450
+  protein: 40.0
+  carbs: 45.0
+  fat: 8.0
+  fibre: 3.0
+  alcohol: 0.0

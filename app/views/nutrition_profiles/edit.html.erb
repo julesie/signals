@@ -1,0 +1,27 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-lg font-semibold">Nutrition Targets</h1>
+      <%= link_to "Back", food_logs_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+    </div>
+
+    <%= render(CardComponent.new) do %>
+      <%= form_with model: @nutrition_profile, url: nutrition_profile_path, method: :patch, class: "space-y-4" do |f| %>
+        <div>
+          <%= f.label :calorie_target, "Daily calorie target (kcal)", class: "block text-sm text-zinc-300 mb-1" %>
+          <%= f.number_field :calorie_target, min: 1, step: 50, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+        </div>
+
+        <div>
+          <%= f.label :protein_target, "Daily protein target (g)", class: "block text-sm text-zinc-300 mb-1" %>
+          <%= f.number_field :protein_target, min: 1, step: 5, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <%= f.submit "Save", class: "bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg cursor-pointer" %>
+          <%= link_to "Cancel", food_logs_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

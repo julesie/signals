@@ -8,6 +8,8 @@ class DashboardController < ApplicationController
       current_user.health_metrics.by_name(name).order(recorded_at: :desc).first
     end
     @latest_sleep = current_user.health_metrics.by_name("sleep_analysis").order(recorded_at: :desc).first
+    @nutrition_profile = current_user.nutrition_profile || current_user.build_nutrition_profile
+    @todays_food_logs = current_user.food_logs.on_date(Date.current)
     @pipeline_stats = {
       total_payloads: current_user.health_payloads.count,
       last_received: current_user.health_payloads.order(created_at: :desc).first&.created_at,
