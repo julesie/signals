@@ -17,27 +17,22 @@ class FoodLogsController < ApplicationController
   end
 
   def create
-    result = FoodEstimationService.call(params[:description])
-
-    unless result.success
-      redirect_to new_food_log_path, alert: "Could not estimate macros — please try again."
-      return
-    end
-
     food = current_user.foods.create!(
       description: params[:description],
-      **result.macros.symbolize_keys
+      kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0, alcohol: 0
     )
 
-    log = current_user.food_logs.new(
+    log = current_user.food_logs.create!(
       food: food,
       consumed_at: build_consumed_at,
-      mealtime: params[:mealtime]
+      mealtime: params[:mealtime],
+      estimated: false,
+      kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0, alcohol: 0
     )
-    log.stamp_macros_from_food!
-    log.save!
 
-    redirect_to food_logs_path(date: log.consumed_at.to_date), notice: "#{food.description} logged."
+    FoodEstimationJob.perform_later(log.id)
+
+    redirect_to food_logs_path(date: log.consumed_at.to_date), notice: "#{food.description} logged — estimating macros..."
   end
 
   def quick_add

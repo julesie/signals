@@ -27,36 +27,26 @@ class FoodLogsTest < ActionDispatch::IntegrationTest
     assert_match "Eggs on toast", response.body
   end
 
-  # -- create (LLM estimation) --
+  # -- create (async LLM estimation) --
 
-  test "create estimates macros and saves food log" do
-    llm_response = '{"kcal": 300, "protein": 25.0, "carbs": 20.0, "fat": 12.0, "fibre": 2.0, "alcohol": 0.0}'
-
-    stub_llm_chat(llm_response) do
-      assert_difference ["Food.count", "FoodLog.count"], 1 do
+  test "create saves food log immediately and enqueues estimation job" do
+    assert_difference ["Food.count", "FoodLog.count"], 1 do
+      assert_enqueued_with(job: FoodEstimationJob) do
         post food_logs_path, params: {description: "Grilled chicken wrap", mealtime: "lunch", consumed_at_hour: 13}
       end
     end
 
     log = @user.food_logs.last
     assert_redirected_to food_logs_path(date: log.consumed_at.to_date)
-    follow_redirect!
-    assert_match "Grilled chicken wrap logged", response.body
     assert_equal "lunch", log.mealtime
-    assert_equal 300.0, log.kcal.to_f
-    assert_equal 25.0, log.protein.to_f
+    assert_equal false, log.estimated?
+    assert_equal 0, log.kcal.to_i
   end
 
-  test "create shows error on LLM failure" do
-    stub_llm_chat_error("API timeout") do
-      assert_no_difference ["Food.count", "FoodLog.count"] do
-        post food_logs_path, params: {description: "Mystery food", mealtime: "dinner"}
-      end
-    end
-
-    assert_redirected_to new_food_log_path
+  test "create redirects to daily view with estimating notice" do
+    post food_logs_path, params: {description: "Grilled chicken wrap", mealtime: "lunch"}
     follow_redirect!
-    assert_match "Could not estimate", response.body
+    assert_match "estimating macros", response.body
   end
 
   # -- quick_add --
@@ -154,28 +144,5 @@ class FoodLogsTest < ActionDispatch::IntegrationTest
     sign_out @user
     get new_food_log_path
     assert_response :redirect
-  end
-
-  private
-
-  def stub_llm_chat(response_text)
-    fake_response = Data.define(:content).new(content: response_text)
-    fake_chat = Object.new
-    fake_chat.define_singleton_method(:with_instructions) { |_| self }
-    fake_chat.define_singleton_method(:ask) { |_| fake_response }
-
-    original_chat = RubyLLM.method(:chat)
-    RubyLLM.define_singleton_method(:chat) { |**_| fake_chat }
-    yield
-  ensure
-    RubyLLM.define_singleton_method(:chat, original_chat)
-  end
-
-  def stub_llm_chat_error(message)
-    original_chat = RubyLLM.method(:chat)
-    RubyLLM.define_singleton_method(:chat) { |**_| raise message }
-    yield
-  ensure
-    RubyLLM.define_singleton_method(:chat, original_chat)
   end
 end
