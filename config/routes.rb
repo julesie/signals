@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   post "dashboard/adherence", to: "dashboard#regenerate_adherence", as: nil
 
   resources :workouts, only: [:index, :update]
+  resources :metrics, only: [:index, :show], param: :metric_name
 
   root "dashboard#index"
 end

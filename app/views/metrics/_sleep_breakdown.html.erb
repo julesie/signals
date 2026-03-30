@@ -1,0 +1,51 @@
+<% meta = metric.metadata || {} %>
+<div class="space-y-3">
+  <% if meta["sleepStart"].present? || meta["sleepEnd"].present? %>
+    <div class="flex gap-6 text-sm text-zinc-300">
+      <% if meta["sleepStart"].present? %>
+        <div>
+          <span class="text-zinc-500">Asleep:</span>
+          <%= Time.parse(meta["sleepStart"]).strftime("%-I:%M %p") %>
+        </div>
+      <% end %>
+      <% if meta["sleepEnd"].present? %>
+        <div>
+          <span class="text-zinc-500">Awake:</span>
+          <%= Time.parse(meta["sleepEnd"]).strftime("%-I:%M %p") %>
+        </div>
+      <% end %>
+      <% if meta["inBed"].present? %>
+        <div>
+          <span class="text-zinc-500">In bed:</span>
+          <%= number_with_precision(meta["inBed"], precision: 1) %> hr
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if meta["core"].present? && meta["deep"].present? && meta["rem"].present? && metric.value > 0 %>
+    <% total = metric.value.to_f %>
+    <% core_pct = (meta["core"].to_f / total * 100).round %>
+    <% deep_pct = (meta["deep"].to_f / total * 100).round %>
+    <% rem_pct = (meta["rem"].to_f / total * 100).round %>
+    <div class="flex h-3 rounded-full overflow-hidden">
+      <div class="bg-blue-400" style="width: <%= core_pct %>%"></div>
+      <div class="bg-indigo-500" style="width: <%= deep_pct %>%"></div>
+      <div class="bg-purple-400" style="width: <%= rem_pct %>%"></div>
+    </div>
+    <div class="flex gap-4 text-xs text-zinc-400">
+      <div class="flex items-center gap-1">
+        <span class="inline-block w-2.5 h-2.5 rounded bg-blue-400"></span>
+        Core <%= number_with_precision(meta["core"], precision: 1) %> hr
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="inline-block w-2.5 h-2.5 rounded bg-indigo-500"></span>
+        Deep <%= number_with_precision(meta["deep"], precision: 1) %> hr
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="inline-block w-2.5 h-2.5 rounded bg-purple-400"></span>
+        REM <%= number_with_precision(meta["rem"], precision: 1) %> hr
+      </div>
+    </div>
+  <% end %>
+</div>

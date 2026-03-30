@@ -33,17 +33,22 @@
 
     <%# Latest Metrics %>
     <section>
-      <h2 class="text-lg font-semibold mb-4">Latest Metrics</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Latest Metrics</h2>
+        <%= link_to "View all", metrics_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+      </div>
       <% if @latest_metrics.any? %>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <% @latest_metrics.each do |metric| %>
-            <%= render(CardComponent.new) do %>
-              <p class="text-sm text-zinc-400"><%= metric.metric_name.titleize %></p>
-              <p class="mt-1 text-2xl font-bold">
-                <%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %>
-                <span class="text-sm font-normal text-zinc-400"><%= metric.units %></span>
-              </p>
-              <p class="mt-1 text-xs text-zinc-500"><%= time_ago_in_words(metric.recorded_at) %> ago</p>
+            <%= link_to metric_path(metric_name: metric.metric_name), class: "block hover:ring-2 hover:ring-zinc-600 rounded-lg transition" do %>
+              <%= render(CardComponent.new) do %>
+                <p class="text-sm text-zinc-400"><%= metric.metric_name.titleize %></p>
+                <p class="mt-1 text-2xl font-bold">
+                  <%= number_with_precision(metric.value, precision: 1, strip_insignificant_zeros: true) %>
+                  <span class="text-sm font-normal text-zinc-400"><%= metric.units %></span>
+                </p>
+                <p class="mt-1 text-xs text-zinc-500"><%= time_ago_in_words(metric.recorded_at) %> ago</p>
+              <% end %>
             <% end %>
           <% end %>
         </div>
@@ -58,7 +63,7 @@
     <section>
       <h2 class="text-lg font-semibold mb-4">Sleep</h2>
       <% if @latest_sleep %>
-        <%= render(CardComponent.new) do %>
+        <%= link_to metric_path(metric_name: "sleep_analysis"), class: "block hover:ring-2 hover:ring-zinc-600 rounded-lg transition" do %><%= render(CardComponent.new) do %>
           <div class="flex items-baseline gap-2 mb-4">
             <span class="text-3xl font-bold"><%= number_with_precision(@latest_sleep.value, precision: 1) %></span>
             <span class="text-sm text-zinc-400">hours of sleep</span>
@@ -115,7 +120,7 @@
               </div>
             </div>
           <% end %>
-        <% end %>
+        <% end %><% end %>
       <% else %>
         <%= render(CardComponent.new) do %>
           <p class="text-center text-zinc-500">No sleep data yet</p>
