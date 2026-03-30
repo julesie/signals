@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_30_020024) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_30_032748) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_30_020024) do
     t.decimal "carbs", precision: 5, scale: 1
     t.datetime "consumed_at", null: false
     t.datetime "created_at", null: false
+    t.boolean "estimated", default: true, null: false
     t.decimal "fat", precision: 5, scale: 1
     t.decimal "fibre", precision: 5, scale: 1
     t.bigint "food_id", null: false

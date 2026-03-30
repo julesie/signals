@@ -65,10 +65,14 @@
                 <div class="flex items-center justify-between">
                   <p class="text-sm text-zinc-100 truncate flex-1 mr-3"><%= log.food.description %></p>
                   <div class="text-right shrink-0">
-                    <span class="text-sm font-medium text-zinc-100"><%= log.kcal.to_i %></span>
-                    <span class="text-xs text-zinc-500">kcal</span>
-                    <span class="text-xs text-zinc-400 ml-2"><%= log.protein.to_i %>g P</span>
-                    <span class="text-xs text-zinc-400 ml-1"><%= log.net_carbs.to_i %>g NC</span>
+                    <% if log.estimated? %>
+                      <span class="text-sm font-medium text-zinc-100"><%= log.kcal.to_i %></span>
+                      <span class="text-xs text-zinc-500">kcal</span>
+                      <span class="text-xs text-zinc-400 ml-2"><%= log.protein.to_i %>g P</span>
+                      <span class="text-xs text-zinc-400 ml-1"><%= log.net_carbs.to_i %>g NC</span>
+                    <% else %>
+                      <span class="text-xs text-zinc-400 italic">Estimating...</span>
+                    <% end %>
                   </div>
                 </div>
               <% end %>
@@ -83,6 +87,10 @@
           </div>
         </div>
       </section>
+    <% end %>
+
+    <% if @food_logs.any? { |l| !l.estimated? } %>
+      <div data-controller="auto-refresh"></div>
     <% end %>
 
     <% if @food_logs.empty? %>
