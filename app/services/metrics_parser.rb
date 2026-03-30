@@ -15,12 +15,13 @@ class MetricsParser
   KJ_TO_KCAL_METRICS = %w[active_energy basal_energy_burned].freeze
   KJ_TO_KCAL = 4.184
 
-  def self.call(metrics_data)
-    new(metrics_data).call
+  def self.call(metrics_data, user:)
+    new(metrics_data, user: user).call
   end
 
-  def initialize(metrics_data)
+  def initialize(metrics_data, user:)
     @metrics_data = metrics_data
+    @user = user
   end
 
   def call
@@ -47,12 +48,12 @@ class MetricsParser
         end
         stored_units = convert ? "kcal" : units
 
-        existing = HealthMetric.find_by(metric_name: name, recorded_at: recorded_at)
+        existing = @user.health_metrics.find_by(metric_name: name, recorded_at: recorded_at)
         if existing
           existing.update!(value: value, units: stored_units, metadata: metadata)
           updated += 1
         else
-          HealthMetric.create!(
+          @user.health_metrics.create!(
             metric_name: name,
             recorded_at: recorded_at,
             value: value,

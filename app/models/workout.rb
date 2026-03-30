@@ -1,4 +1,6 @@
 class Workout < ApplicationRecord
+  belongs_to :user
+
   validates :external_id, presence: true, uniqueness: true
   validates :workout_type, presence: true
   validates :started_at, presence: true

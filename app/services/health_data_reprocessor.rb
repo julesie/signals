@@ -4,10 +4,25 @@ class HealthDataReprocessor
   end
 
   def call
+    results = {}
+
+    HealthPayload.select(:user_id).distinct.pluck(:user_id).each do |user_id|
+      user = User.find(user_id)
+      results[user_id] = reprocess_for_user(user)
+    end
+
+    HealthPayload.update_all(status: "processed", error_message: nil)
+
+    results
+  end
+
+  private
+
+  def reprocess_for_user(user)
     metrics_by_name = {}
     workouts_by_id = {}
 
-    HealthPayload.order(:created_at).find_each do |payload|
+    user.health_payloads.order(:created_at).find_each do |payload|
       data = payload.raw_json["data"]
       next unless data
 
@@ -35,15 +50,13 @@ class HealthDataReprocessor
       {"name" => name, "units" => entry["units"], "data" => entry["data_by_ts"].values}
     end
 
-    # Clear and reprocess as single merged dataset
+    # Clear this user's data and reprocess from merged payloads
     ActiveRecord::Base.transaction do
-      HealthMetric.delete_all
-      Workout.delete_all
+      user.health_metrics.delete_all
+      user.workouts.delete_all
 
-      metrics_result = MetricsParser.call(merged_metrics)
-      workouts_result = WorkoutParser.call(workouts_by_id.values)
-
-      HealthPayload.update_all(status: "processed", error_message: nil)
+      metrics_result = MetricsParser.call(merged_metrics, user: user)
+      workouts_result = WorkoutParser.call(workouts_by_id.values, user: user)
 
       {metrics: metrics_result, workouts: workouts_result}
     end

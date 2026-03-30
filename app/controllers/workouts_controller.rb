@@ -2,7 +2,7 @@ class WorkoutsController < ApplicationController
   PER_PAGE = 20
 
   def index
-    workouts = Workout.order(started_at: :desc)
+    workouts = current_user.workouts.order(started_at: :desc)
     workouts = workouts.where(workout_type: params[:workout_type]) if params[:workout_type].present?
 
     if params[:from].present? || params[:to].present?
@@ -13,7 +13,7 @@ class WorkoutsController < ApplicationController
       workouts = workouts.where(started_at: 30.days.ago..)
     end
 
-    @workout_types = Workout.distinct.pluck(:workout_type).sort
+    @workout_types = current_user.workouts.distinct.pluck(:workout_type).sort
 
     @page = (params[:page] || 1).to_i
     @total_count = workouts.count
@@ -22,7 +22,7 @@ class WorkoutsController < ApplicationController
   end
 
   def update
-    @workout = Workout.find(params[:id])
+    @workout = current_user.workouts.find(params[:id])
     if @workout.update(workout_params)
       redirect_back fallback_location: workouts_path, notice: "Note saved."
     else

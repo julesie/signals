@@ -65,7 +65,7 @@ class PlanAdherenceGenerator
   end
 
   def format_workouts(since)
-    workouts = Workout.where(started_at: since..).order(started_at: :asc)
+    workouts = @plan.user.workouts.where(started_at: since..).order(started_at: :asc)
     return "No workouts recorded." if workouts.empty?
 
     workouts.map { |w|
@@ -80,7 +80,7 @@ class PlanAdherenceGenerator
   end
 
   def format_active_energy
-    metrics = HealthMetric.where(metric_name: "active_energy", recorded_at: 7.days.ago..)
+    metrics = @plan.user.health_metrics.where(metric_name: "active_energy", recorded_at: 7.days.ago..)
     return "No active energy data." if metrics.empty?
 
     daily = metrics.group_by { |m| m.recorded_at.to_date }.transform_values { |ms| ms.sum(&:value) }

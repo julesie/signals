@@ -29,13 +29,14 @@ class CsvImporter
   KJ_TO_KCAL = 4.184
   KJ_METRICS = %w[active_energy basal_energy_burned].freeze
 
-  def self.call(metrics_csv_path:, workouts_csv_path: nil)
-    new(metrics_csv_path: metrics_csv_path, workouts_csv_path: workouts_csv_path).call
+  def self.call(metrics_csv_path:, user:, workouts_csv_path: nil)
+    new(metrics_csv_path: metrics_csv_path, user: user, workouts_csv_path: workouts_csv_path).call
   end
 
-  def initialize(metrics_csv_path:, workouts_csv_path: nil)
+  def initialize(metrics_csv_path:, user:, workouts_csv_path: nil)
     @metrics_csv_path = metrics_csv_path
     @workouts_csv_path = workouts_csv_path
+    @user = user
   end
 
   def call
@@ -134,12 +135,12 @@ class CsvImporter
         metadata: build_workout_metadata(row)
       }
 
-      existing = Workout.find_by(external_id: external_id)
+      existing = @user.workouts.find_by(external_id: external_id)
       if existing
         existing.update!(**attrs)
         updated += 1
       else
-        Workout.create!(external_id: external_id, **attrs)
+        @user.workouts.create!(external_id: external_id, **attrs)
         created += 1
       end
     end
@@ -162,12 +163,12 @@ class CsvImporter
   end
 
   def upsert_metric(name:, recorded_at:, value:, units:, metadata: nil)
-    existing = HealthMetric.find_by(metric_name: name, recorded_at: recorded_at)
+    existing = @user.health_metrics.find_by(metric_name: name, recorded_at: recorded_at)
     if existing
       existing.update!(value: value, units: units, metadata: metadata)
       [0, 1]
     else
-      HealthMetric.create!(metric_name: name, recorded_at: recorded_at, value: value, units: units, metadata: metadata)
+      @user.health_metrics.create!(metric_name: name, recorded_at: recorded_at, value: value, units: units, metadata: metadata)
       [1, 0]
     end
   end
