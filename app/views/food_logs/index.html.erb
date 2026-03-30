@@ -1,0 +1,97 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-6">
+    <%# Header with date picker %>
+    <div class="flex items-center justify-between">
+      <h1 class="text-lg font-semibold">
+        <%= @date == Date.current ? "Today" : @date.strftime("%A, %b %-d") %>
+      </h1>
+      <div class="flex items-center gap-3">
+        <%= link_to "Add food", new_food_log_path, class: "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg" %>
+      </div>
+    </div>
+
+    <%# Date picker %>
+    <%= form_with url: food_logs_path, method: :get, class: "flex items-center gap-2" do |f| %>
+      <%= f.date_field :date, value: @date, class: "bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+      <%= f.submit "Go", class: "bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium px-3 py-1.5 rounded-lg cursor-pointer" %>
+    <% end %>
+
+    <%# Progress bars %>
+    <%= render(CardComponent.new) do %>
+      <div class="space-y-3">
+        <% cal_pct = @nutrition_profile.calorie_target > 0 ? [(@food_logs.sum(&:kcal).to_f / @nutrition_profile.calorie_target * 100).round, 100].min : 0 %>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-zinc-300">Calories</span>
+            <span class="text-zinc-400"><%= @food_logs.sum(&:kcal).to_i %> / <%= @nutrition_profile.calorie_target %> kcal</span>
+          </div>
+          <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 rounded-full" style="width: <%= cal_pct %>%"></div>
+          </div>
+        </div>
+
+        <% pro_pct = @nutrition_profile.protein_target > 0 ? [(@food_logs.sum(&:protein).to_f / @nutrition_profile.protein_target * 100).round, 100].min : 0 %>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-zinc-300">Protein</span>
+            <span class="text-zinc-400"><%= @food_logs.sum(&:protein).to_i %> / <%= @nutrition_profile.protein_target %>g</span>
+          </div>
+          <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div class="h-full bg-green-500 rounded-full" style="width: <%= pro_pct %>%"></div>
+          </div>
+        </div>
+
+        <div class="flex gap-4 text-xs text-zinc-500 pt-1">
+          <span>Fat: <%= @food_logs.sum(&:fat).to_i %>g</span>
+          <span>Net carbs: <%= @food_logs.sum(&:net_carbs).to_i %>g</span>
+          <span>Fibre: <%= @food_logs.sum(&:fibre).to_i %>g</span>
+        </div>
+
+        <%= link_to "Edit targets", edit_nutrition_profile_path, class: "text-xs text-zinc-500 hover:text-zinc-300" %>
+      </div>
+    <% end %>
+
+    <%# Mealtime groups %>
+    <% FoodLog::MEALTIMES.each do |mealtime| %>
+      <% logs = @grouped_logs[mealtime] %>
+      <% next unless logs&.any? %>
+
+      <section>
+        <h2 class="text-sm font-medium text-zinc-400 mb-2 capitalize"><%= mealtime %></h2>
+        <div class="space-y-2">
+          <% logs.each do |log| %>
+            <%= link_to edit_food_log_path(log), class: "block" do %>
+              <%= render(CardComponent.new) do %>
+                <div class="flex items-center justify-between">
+                  <p class="text-sm text-zinc-100 truncate flex-1 mr-3"><%= log.food.description %></p>
+                  <div class="text-right shrink-0">
+                    <span class="text-sm font-medium text-zinc-100"><%= log.kcal.to_i %></span>
+                    <span class="text-xs text-zinc-500">kcal</span>
+                    <span class="text-xs text-zinc-400 ml-2"><%= log.protein.to_i %>g P</span>
+                    <span class="text-xs text-zinc-400 ml-1"><%= log.net_carbs.to_i %>g NC</span>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <%# Subtotal %>
+          <div class="flex justify-end text-xs text-zinc-500 px-2">
+            <span><%= logs.sum(&:kcal).to_i %> kcal</span>
+            <span class="ml-3"><%= logs.sum(&:protein).to_i %>g P</span>
+            <span class="ml-2"><%= logs.sum(&:net_carbs).to_i %>g NC</span>
+          </div>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @food_logs.empty? %>
+      <%= render(CardComponent.new) do %>
+        <div class="text-center py-4">
+          <p class="text-zinc-500 mb-3">No food logged<%= " today" if @date == Date.current %>.</p>
+          <%= link_to "Log something", new_food_log_path, class: "text-sm text-blue-400 hover:text-blue-300" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

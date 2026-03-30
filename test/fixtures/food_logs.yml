@@ -1,0 +1,35 @@
+breakfast_eggs:
+  user: one
+  food: eggs_on_toast
+  consumed_at: <%= Time.current.change(hour: 8).to_fs(:db) %>
+  mealtime: breakfast
+  kcal: 350
+  protein: 20.0
+  carbs: 30.0
+  fat: 18.0
+  fibre: 2.0
+  alcohol: 0.0
+
+breakfast_coffee:
+  user: one
+  food: black_coffee
+  consumed_at: <%= Time.current.change(hour: 8).to_fs(:db) %>
+  mealtime: breakfast
+  kcal: 5
+  protein: 0.3
+  carbs: 0.0
+  fat: 0.0
+  fibre: 0.0
+  alcohol: 0.0
+
+lunch_chicken:
+  user: one
+  food: chicken_rice
+  consumed_at: <%= Time.current.change(hour: 13).to_fs(:db) %>
+  mealtime: lunch
+  kcal: 450
+  protein: 40.0
+  carbs: 45.0
+  fat: 8.0
+  fibre: 3.0
+  alcohol: 0.0

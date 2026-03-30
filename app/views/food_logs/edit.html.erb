@@ -1,0 +1,62 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-lg font-semibold">Edit Entry</h1>
+      <%= link_to "Back", food_logs_path(date: @food_log.consumed_at.to_date), class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+    </div>
+
+    <%= render(CardComponent.new) do %>
+      <p class="text-sm text-zinc-400 mb-4"><%= @food_log.food.description %></p>
+
+      <%= form_with model: @food_log, url: food_log_path(@food_log), method: :patch, class: "space-y-4" do |f| %>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.label :mealtime, "Meal", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.select :mealtime, FoodLog::MEALTIMES.map { |m| [m.capitalize, m] }, { include_blank: false }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" } %>
+          </div>
+
+          <div>
+            <%= f.label :consumed_at_hour, "Time", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.select :consumed_at_hour, (0..23).map { |h| [format("%02d:00", h), h] }, { selected: @food_log.consumed_at.hour }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" } %>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <%= f.label :kcal, "Calories", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :kcal, step: 1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+          <div>
+            <%= f.label :protein, "Protein (g)", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :protein, step: 0.1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+          <div>
+            <%= f.label :carbs, "Carbs (g)", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :carbs, step: 0.1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <%= f.label :fat, "Fat (g)", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :fat, step: 0.1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+          <div>
+            <%= f.label :fibre, "Fibre (g)", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :fibre, step: 0.1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+          <div>
+            <%= f.label :alcohol, "Alcohol (g)", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.number_field :alcohol, step: 0.1, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" %>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <%= f.submit "Save", class: "bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg cursor-pointer" %>
+          <%= link_to "Cancel", food_logs_path(date: @food_log.consumed_at.to_date), class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+          <%= button_to "Delete", food_log_path(@food_log), method: :delete, class: "text-sm text-red-400 hover:text-red-300 ml-auto cursor-pointer", data: { turbo_confirm: "Delete this entry?" } %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

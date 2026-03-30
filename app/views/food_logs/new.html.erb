@@ -1,0 +1,61 @@
+<%= render(PageLayoutComponent.new) do %>
+  <div class="space-y-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-lg font-semibold">Log Food</h1>
+      <%= link_to "Today's log", food_logs_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
+    </div>
+
+    <%# Quick-add: Recent %>
+    <% if @recent.any? %>
+      <section>
+        <h2 class="text-sm font-medium text-zinc-400 mb-3">Recent (<%= @mealtime %>)</h2>
+        <div class="space-y-2">
+          <% @recent.each do |food| %>
+            <%= render "food_logs/quick_add_item", food: food %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <%# Quick-add: Frequent %>
+    <% if @frequent.any? %>
+      <section>
+        <h2 class="text-sm font-medium text-zinc-400 mb-3">Favourites (<%= @mealtime %>)</h2>
+        <div class="space-y-2">
+          <% @frequent.each do |food| %>
+            <%= render "food_logs/quick_add_item", food: food %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <%# Free-text form %>
+    <section>
+      <h2 class="text-sm font-medium text-zinc-400 mb-3">Log something new</h2>
+      <%= render(CardComponent.new) do %>
+        <%= form_with url: food_logs_path, method: :post, class: "space-y-4", data: { controller: "submit-button" } do |f| %>
+          <div>
+            <%= f.label :description, "What did you eat?", class: "block text-sm text-zinc-300 mb-1" %>
+            <%= f.text_area :description, value: @prefill, placeholder: "e.g. Two eggs on toast with butter", rows: 2, required: true, class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 resize-none" %>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <%= f.label :mealtime, "Meal", class: "block text-sm text-zinc-300 mb-1" %>
+              <%= f.select :mealtime, FoodLog::MEALTIMES.map { |m| [m.capitalize, m] }, { selected: @mealtime }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" } %>
+            </div>
+
+            <div>
+              <%= f.label :consumed_at_hour, "Time", class: "block text-sm text-zinc-300 mb-1" %>
+              <%= f.select :consumed_at_hour, (0..23).map { |h| [format("%02d:00", h), h] }, { selected: Time.current.hour }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" } %>
+            </div>
+          </div>
+
+          <div>
+            <%= f.submit "Estimate & log", class: "w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg cursor-pointer", data: { submit_button_target: "button" } %>
+          </div>
+        <% end %>
+      <% end %>
+    </section>
+  </div>
+<% end %>

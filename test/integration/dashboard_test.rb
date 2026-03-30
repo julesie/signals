@@ -16,6 +16,27 @@ class DashboardTest < ActionDispatch::IntegrationTest
     @user.health_payloads.create!(raw_json: {data: {}}, status: "processed")
   end
 
+  test "dashboard shows nutrition summary with progress bars" do
+    get root_path
+    assert_response :success
+    assert_match "Nutrition", response.body
+    assert_match "Calories", response.body
+    assert_match "Protein", response.body
+    assert_match "Add food", response.body
+  end
+
+  test "dashboard shows food log totals" do
+    get root_path
+    assert_response :success
+    assert_match "/ 1600 kcal", response.body
+    assert_match "/ 100g", response.body
+  end
+
+  test "dashboard navbar includes Food link" do
+    get root_path
+    assert_select "a[href='#{food_logs_path}']", text: "Food"
+  end
+
   test "dashboard shows metric values" do
     get root_path
     assert_response :success
