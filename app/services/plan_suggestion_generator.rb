@@ -63,7 +63,7 @@ class PlanSuggestionGenerator
   end
 
   def format_workouts
-    workouts = Workout.where(started_at: 7.days.ago..).order(started_at: :asc)
+    workouts = @plan.user.workouts.where(started_at: 7.days.ago..).order(started_at: :asc)
     return "No workouts recorded." if workouts.empty?
 
     workouts.map { |w|
@@ -79,7 +79,7 @@ class PlanSuggestionGenerator
   end
 
   def format_todays_workouts
-    workouts = Workout.where(started_at: Date.current.all_day).order(started_at: :asc)
+    workouts = @plan.user.workouts.where(started_at: Date.current.all_day).order(started_at: :asc)
     return "No workouts completed yet today." if workouts.empty?
 
     workouts.map { |w|
@@ -93,7 +93,7 @@ class PlanSuggestionGenerator
   end
 
   def format_metrics
-    metrics = HealthMetric.where(recorded_at: 7.days.ago..)
+    metrics = @plan.user.health_metrics.where(recorded_at: 7.days.ago..)
     return "No metrics recorded." if metrics.empty?
 
     summary = []

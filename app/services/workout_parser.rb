@@ -4,12 +4,13 @@ class WorkoutParser
   COMMON_FIELDS = %w[id name start end duration location isIndoor].freeze
   KJ_TO_KCAL = 4.184
 
-  def self.call(workouts_data)
-    new(workouts_data).call
+  def self.call(workouts_data, user:)
+    new(workouts_data, user: user).call
   end
 
-  def initialize(workouts_data)
+  def initialize(workouts_data, user:)
     @workouts_data = workouts_data
+    @user = user
   end
 
   def call
@@ -19,10 +20,10 @@ class WorkoutParser
     @workouts_data.each do |workout_data|
       external_id = workout_data["id"]
 
-      if Workout.exists?(external_id: external_id)
+      if @user.workouts.exists?(external_id: external_id)
         skipped += 1
       else
-        Workout.create!(
+        @user.workouts.create!(
           external_id: external_id,
           workout_type: workout_data["name"],
           started_at: Time.parse(workout_data["start"]),

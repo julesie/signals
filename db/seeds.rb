@@ -12,6 +12,7 @@ if metrics_csv.exist?
   puts "Importing historical health data..."
   result = CsvImporter.call(
     metrics_csv_path: metrics_csv.to_s,
+    user: user,
     workouts_csv_path: workouts_csv.exist? ? workouts_csv.to_s : nil
   )
   puts "  Metrics: #{result.metrics_created} created, #{result.metrics_updated} updated"

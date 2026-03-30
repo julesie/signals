@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_191222) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_214206) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,8 +21,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_191222) do
     t.datetime "recorded_at", null: false
     t.string "units", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.decimal "value", null: false
-    t.index ["metric_name", "recorded_at"], name: "index_health_metrics_on_metric_name_and_recorded_at", unique: true
+    t.index ["user_id", "metric_name", "recorded_at"], name: "idx_on_user_id_metric_name_recorded_at_c228f30335", unique: true
+    t.index ["user_id"], name: "index_health_metrics_on_user_id"
   end
 
   create_table "health_payloads", force: :cascade do |t|
@@ -31,6 +33,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_191222) do
     t.jsonb "raw_json", null: false
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_health_payloads_on_user_id"
   end
 
   create_table "plans", force: :cascade do |t|
@@ -69,9 +73,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_191222) do
     t.text "notes"
     t.datetime "started_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.string "workout_type", null: false
     t.index ["external_id"], name: "index_workouts_on_external_id", unique: true
+    t.index ["user_id", "started_at"], name: "index_workouts_on_user_id_and_started_at"
+    t.index ["user_id"], name: "index_workouts_on_user_id"
   end
 
+  add_foreign_key "health_metrics", "users"
+  add_foreign_key "health_payloads", "users"
   add_foreign_key "plans", "users"
+  add_foreign_key "workouts", "users"
 end

@@ -1,12 +1,13 @@
 class HealthDataProcessor
   Result = Struct.new(:success, :metrics_created, :metrics_updated, :metrics_skipped, :workouts_created, :workouts_skipped, keyword_init: true)
 
-  def self.call(health_payload)
-    new(health_payload).call
+  def self.call(health_payload, user:)
+    new(health_payload, user: user).call
   end
 
-  def initialize(health_payload)
+  def initialize(health_payload, user:)
     @health_payload = health_payload
+    @user = user
   end
 
   def call
@@ -18,8 +19,8 @@ class HealthDataProcessor
       metrics_data = data["metrics"] || []
       workouts_data = data["workouts"] || []
 
-      metrics_result = MetricsParser.call(metrics_data)
-      workouts_result = WorkoutParser.call(workouts_data)
+      metrics_result = MetricsParser.call(metrics_data, user: @user)
+      workouts_result = WorkoutParser.call(workouts_data, user: @user)
       @health_payload.update!(status: "processed")
     end
 

@@ -5,15 +5,15 @@ class DashboardTest < ActionDispatch::IntegrationTest
     @user = users(:one)
     sign_in @user
 
-    HealthMetric.create!(metric_name: "weight", recorded_at: 1.hour.ago, value: 82.5, units: "kg")
-    HealthMetric.create!(metric_name: "resting_heart_rate", recorded_at: 1.hour.ago, value: 58, units: "bpm")
-    HealthMetric.create!(
+    @user.health_metrics.create!(metric_name: "weight", recorded_at: 1.hour.ago, value: 82.5, units: "kg")
+    @user.health_metrics.create!(metric_name: "resting_heart_rate", recorded_at: 1.hour.ago, value: 58, units: "bpm")
+    @user.health_metrics.create!(
       metric_name: "sleep_analysis", recorded_at: 1.hour.ago, value: 7.2, units: "hr",
       metadata: {"core" => 3.5, "deep" => 1.8, "rem" => 1.5,
                  "sleepStart" => "2026-03-13 22:45:00", "sleepEnd" => "2026-03-14 06:05:00",
                  "inBed" => 7.5}
     )
-    HealthPayload.create!(raw_json: {data: {}}, status: "processed")
+    @user.health_payloads.create!(raw_json: {data: {}}, status: "processed")
   end
 
   test "dashboard shows metric values" do
@@ -29,7 +29,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
   end
 
   test "dashboard shows today's workouts" do
-    Workout.create!(
+    @user.workouts.create!(
       external_id: "today-run", workout_type: "Running",
       started_at: 2.hours.ago, ended_at: 1.hour.ago, duration: 3600,
       distance: 10.0, distance_units: "km", energy_burned: 600

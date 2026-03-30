@@ -5,13 +5,13 @@ class WorkoutsTest < ActionDispatch::IntegrationTest
     @user = users(:one)
     sign_in @user
 
-    @run = Workout.create!(
+    @run = @user.workouts.create!(
       external_id: "w-run", workout_type: "Outdoor Run",
       started_at: 2.days.ago, ended_at: 2.days.ago + 30.minutes,
       duration: 1800, distance: 5.0, distance_units: "km", energy_burned: 300,
       metadata: {"heartRate" => {"avg" => 155}}
     )
-    @swim = Workout.create!(
+    @swim = @user.workouts.create!(
       external_id: "w-swim", workout_type: "Pool Swim",
       started_at: 1.day.ago, ended_at: 1.day.ago + 40.minutes,
       duration: 2400, energy_burned: 400
@@ -70,5 +70,29 @@ class WorkoutsTest < ActionDispatch::IntegrationTest
     patch workout_path(@run), params: {workout: {notes: "test"}}
     assert_response :redirect
     assert_nil @run.reload.notes
+  end
+
+  test "cannot see other user's workouts" do
+    other_user = users(:two)
+    other_user.workouts.create!(
+      external_id: "other-run", workout_type: "Outdoor Run",
+      started_at: 1.day.ago, ended_at: 1.day.ago + 30.minutes,
+      duration: 1800
+    )
+    get workouts_path
+    assert_response :success
+    assert_no_match "other-run", response.body
+  end
+
+  test "cannot update other user's workout" do
+    other_user = users(:two)
+    other_workout = other_user.workouts.create!(
+      external_id: "other-edit", workout_type: "Running",
+      started_at: 1.day.ago, ended_at: 1.day.ago + 30.minutes,
+      duration: 1800
+    )
+    patch workout_path(other_workout), params: {workout: {notes: "hacked"}}
+    assert_response :not_found
+    assert_nil other_workout.reload.notes
   end
 end

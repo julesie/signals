@@ -4,15 +4,15 @@ class DashboardController < ApplicationController
 
   def index
     @plan = current_user.plan
-    @todays_workouts = Workout.where(started_at: Date.current.all_day).order(started_at: :desc)
+    @todays_workouts = current_user.workouts.where(started_at: Date.current.all_day).order(started_at: :desc)
     @latest_metrics = METRIC_TYPES.filter_map do |name|
-      HealthMetric.where(metric_name: name).order(recorded_at: :desc).first
+      current_user.health_metrics.where(metric_name: name).order(recorded_at: :desc).first
     end
-    @latest_sleep = HealthMetric.where(metric_name: "sleep_analysis").order(recorded_at: :desc).first
+    @latest_sleep = current_user.health_metrics.where(metric_name: "sleep_analysis").order(recorded_at: :desc).first
     @pipeline_stats = {
-      total_payloads: HealthPayload.count,
-      last_received: HealthPayload.order(created_at: :desc).first&.created_at,
-      failed_count: HealthPayload.where(status: "failed").count
+      total_payloads: current_user.health_payloads.count,
+      last_received: current_user.health_payloads.order(created_at: :desc).first&.created_at,
+      failed_count: current_user.health_payloads.where(status: "failed").count
     }
   end
 
@@ -63,7 +63,7 @@ class DashboardController < ApplicationController
   end
 
   def load_active_calories
-    metrics = HealthMetric.where(metric_name: "active_energy", recorded_at: 7.days.ago..)
+    metrics = current_user.health_metrics.where(metric_name: "active_energy", recorded_at: 7.days.ago..)
     daily = metrics.group_by { |m| m.recorded_at.to_date }.transform_values { |ms| ms.sum(&:value).round }
 
     @active_calories_days = (6.days.ago.to_date..Date.current).map do |date|

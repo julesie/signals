@@ -28,7 +28,7 @@ class PlanAdherenceGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes plan content and workout data in the context" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "adherence-test",
       workout_type: "Running",
       started_at: 2.days.ago,
@@ -50,7 +50,7 @@ class PlanAdherenceGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes workout notes in the context when present" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "adherence-noted",
       workout_type: "Running",
       started_at: 2.days.ago,

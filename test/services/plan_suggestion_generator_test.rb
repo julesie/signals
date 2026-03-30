@@ -41,7 +41,7 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes recent workouts in the context" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "test-workout-suggestion",
       workout_type: "Running",
       started_at: 2.days.ago,
@@ -63,7 +63,7 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes today's completed workouts in the context" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "today-strength",
       workout_type: "Traditional Strength Training",
       started_at: 3.hours.ago,
@@ -83,7 +83,7 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes workout notes in the context when present" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "noted-workout",
       workout_type: "Running",
       started_at: 2.days.ago,
@@ -102,7 +102,7 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
   end
 
   test "includes today's workout notes in the context" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "today-noted",
       workout_type: "Running",
       started_at: 1.hour.ago,
@@ -121,7 +121,7 @@ class PlanSuggestionGeneratorTest < ActiveSupport::TestCase
   end
 
   test "omits notes from context when not present" do
-    Workout.create!(
+    @plan.user.workouts.create!(
       external_id: "no-note-workout",
       workout_type: "Running",
       started_at: 2.days.ago,

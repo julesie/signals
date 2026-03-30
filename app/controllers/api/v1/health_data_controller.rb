@@ -2,12 +2,14 @@ class Api::V1::HealthDataController < ActionController::API
   before_action :authenticate_token!
 
   def create
-    health_payload = HealthPayload.create!(
+    user = User.find_by!(email: "jules@julescoleman.com")
+
+    health_payload = user.health_payloads.create!(
       raw_json: JSON.parse(request.raw_post),
       status: "pending"
     )
 
-    result = HealthDataProcessor.call(health_payload)
+    result = HealthDataProcessor.call(health_payload, user: user)
 
     if result.success
       render json: {
