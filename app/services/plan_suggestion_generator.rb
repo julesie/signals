@@ -24,7 +24,7 @@ class PlanSuggestionGenerator
   def call
     context = build_context
     response = RubyLLM.chat(model: llm_model)
-      .with_params(reasoning_effort: "low")
+      .with_params(reasoning_effort: "medium")
       .with_instructions(SYSTEM_PROMPT)
       .ask(context)
 
