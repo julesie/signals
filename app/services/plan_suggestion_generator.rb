@@ -4,7 +4,9 @@ class PlanSuggestionGenerator
   DEFAULT_MODEL = "gpt-5-nano"
 
   SYSTEM_PROMPT = <<~PROMPT
-    You are a concise fitness coach. Given the user's training plan, their activity over the last 7 days, and any workouts already completed today, tell them what to do for the rest of TODAY. Nothing else — no planning ahead.
+    You are a concise fitness coach. Given the user's training plan, their activity over the last 7 days, and any workouts already completed today, suggest what to do for the rest of TODAY.
+
+    Look at what the plan calls for over a full week, then compare it to what the user has actually done in the last 7 days. Today's suggestion should fill a gap — prioritize whatever workout types or muscle groups are most behind for the week. Avoid repeating the same type of workout from the last 1–2 days unless catching up requires it.
 
     If they've already worked out today, acknowledge it and suggest complementary activity or rest — don't suggest an additional full workout.
 
