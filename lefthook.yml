@@ -1,11 +1,9 @@
-rc: eval "$(rbenv init - zsh)"
-
 pre-commit:
   parallel: true
   commands:
     standardrb:
       glob: "*.rb"
-      run: bundle exec standardrb --fix {staged_files}
+      run: ~/.rbenv/shims/bundle exec standardrb --fix {staged_files}
       stage_fixed: true
     docs-reminder:
       run: |
@@ -20,6 +18,6 @@ pre-push:
   parallel: true
   commands:
     brakeman:
-      run: bundle exec brakeman -q --no-pager
+      run: ~/.rbenv/shims/bundle exec brakeman -q --no-pager
     tests:
-      run: bundle exec rails test
+      run: ~/.rbenv/shims/bundle exec rails test
