@@ -1,3 +1,5 @@
+rc: eval "$(rbenv init - zsh)"
+
 pre-commit:
   parallel: true
   commands:
