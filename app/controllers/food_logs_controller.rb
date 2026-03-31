@@ -10,10 +10,17 @@ class FoodLogsController < ApplicationController
   end
 
   def new
-    @mealtime = FoodLog.default_mealtime
+    @mealtime = params[:mealtime].presence_in(FoodLog::MEALTIMES) || FoodLog.default_mealtime
     @prefill = params[:prefill]
     @recent = recent_foods(@mealtime)
     @frequent = frequent_foods(@mealtime)
+  end
+
+  def quick_add_lists
+    @mealtime = params[:mealtime].presence_in(FoodLog::MEALTIMES) || FoodLog.default_mealtime
+    @recent = recent_foods(@mealtime)
+    @frequent = frequent_foods(@mealtime)
+    render partial: "food_logs/quick_add_lists"
   end
 
   def create

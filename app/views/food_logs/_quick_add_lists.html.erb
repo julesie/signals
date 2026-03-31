@@ -1,0 +1,25 @@
+<%= turbo_frame_tag "quick_add_lists", data: { mealtime_select_target: "frame" } do %>
+  <div class="space-y-8">
+    <% if @recent.any? %>
+      <section>
+        <h2 class="text-sm font-medium text-zinc-400 mb-3">Recent (<%= @mealtime %>)</h2>
+        <div class="space-y-2">
+          <% @recent.each do |food| %>
+            <%= render "food_logs/quick_add_item", food: food %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @frequent.any? %>
+      <section>
+        <h2 class="text-sm font-medium text-zinc-400 mb-3">Favourites (<%= @mealtime %>)</h2>
+        <div class="space-y-2">
+          <% @frequent.each do |food| %>
+            <%= render "food_logs/quick_add_item", food: food %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+<% end %>

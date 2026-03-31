@@ -27,7 +27,11 @@ Rails.application.routes.draw do
   resources :workouts, only: [:index, :update]
   resources :metrics, only: [:index, :show], param: :metric_name
 
-  resources :food_logs, only: [:index, :new, :create, :edit, :update, :destroy]
+  resources :food_logs, only: [:index, :new, :create, :edit, :update, :destroy] do
+    collection do
+      get :quick_add_lists
+    end
+  end
   post "food_logs/quick_add/:food_id", to: "food_logs#quick_add", as: :quick_add_food_log
   resource :nutrition_profile, only: [:edit, :update]
 

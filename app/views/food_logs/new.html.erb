@@ -1,33 +1,9 @@
 <%= render(PageLayoutComponent.new) do %>
-  <div class="space-y-8">
+  <div class="space-y-8" data-controller="mealtime-select" data-mealtime-select-url-value="<%= quick_add_lists_food_logs_path %>">
     <div class="flex items-center justify-between">
       <h1 class="text-lg font-semibold">Log Food</h1>
       <%= link_to "Today's log", food_logs_path, class: "text-sm text-zinc-400 hover:text-zinc-200" %>
     </div>
-
-    <%# Quick-add: Recent %>
-    <% if @recent.any? %>
-      <section>
-        <h2 class="text-sm font-medium text-zinc-400 mb-3">Recent (<%= @mealtime %>)</h2>
-        <div class="space-y-2">
-          <% @recent.each do |food| %>
-            <%= render "food_logs/quick_add_item", food: food %>
-          <% end %>
-        </div>
-      </section>
-    <% end %>
-
-    <%# Quick-add: Frequent %>
-    <% if @frequent.any? %>
-      <section>
-        <h2 class="text-sm font-medium text-zinc-400 mb-3">Favourites (<%= @mealtime %>)</h2>
-        <div class="space-y-2">
-          <% @frequent.each do |food| %>
-            <%= render "food_logs/quick_add_item", food: food %>
-          <% end %>
-        </div>
-      </section>
-    <% end %>
 
     <%# Free-text form %>
     <section>
@@ -42,7 +18,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <%= f.label :mealtime, "Meal", class: "block text-sm text-zinc-300 mb-1" %>
-              <%= f.select :mealtime, FoodLog::MEALTIMES.map { |m| [m.capitalize, m] }, { selected: @mealtime }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500" } %>
+              <%= f.select :mealtime, FoodLog::MEALTIMES.map { |m| [m.capitalize, m] }, { selected: @mealtime }, { class: "w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-500", data: { action: "change->mealtime-select#change" } } %>
             </div>
 
             <div>
@@ -57,5 +33,7 @@
         <% end %>
       <% end %>
     </section>
+
+    <%= render "food_logs/quick_add_lists" %>
   </div>
 <% end %>
