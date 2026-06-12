@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_30_032748) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_12_234048) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -245,11 +245,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_30_032748) do
     t.string "external_id", null: false
     t.jsonb "metadata"
     t.text "notes"
+    t.string "notion_page_id"
     t.datetime "started_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.string "workout_type", null: false
     t.index ["external_id"], name: "index_workouts_on_external_id", unique: true
+    t.index ["notion_page_id"], name: "index_workouts_on_notion_page_id"
     t.index ["user_id", "started_at"], name: "index_workouts_on_user_id_and_started_at"
     t.index ["user_id"], name: "index_workouts_on_user_id"
   end
