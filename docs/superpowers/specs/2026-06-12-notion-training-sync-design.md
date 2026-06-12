@@ -77,13 +77,13 @@ config/recurring.yml additions:
 
 | Component | Responsibility |
 |---|---|
-| `Notion::Client` (`app/services/notion/client.rb`) | Minimal Notion REST wrapper: `query_data_source`, `create_page`, `update_page`. `Net::HTTP`, no new gem. Auth via `NOTION_API_TOKEN`. |
+| `Notion::Client` (`app/services/notion/client.rb`) | Minimal Notion REST wrapper: `query_data_source`, `create_page`, `update_page`, `append_blocks` (for page-body commentary). `Net::HTTP`, no new gem. Auth via `NOTION_API_TOKEN`. |
 | `Notion::DailyLogSync` | Upsert daily log row for a date (find by `Date` property, create with generated title if missing); write data fields only. |
 | `Notion::WorkoutSync` | Match an Apple Health workout to a `Planned` Notion row (by PT date + type); fill actuals, set `Status: Done`; create row if unmatched; persist `notion_page_id` on the `workouts` record. Chains `WorkoutCommentaryJob` on first sync. |
 | `NotionSyncJob` (Solid Queue) | Orchestrates DailyLogSync + WorkoutSync for the rolling window. Enqueued by webhook success and by `notion_catchup`. |
-| `Notion::WorkoutCommentaryGenerator` + `WorkoutCommentaryJob` | One `RubyLLM.chat` call (PlanSuggestionGenerator pattern); context: the workout, plan content, recent training. Writes commentary. Runs once per workout. |
+| `Notion::WorkoutCommentaryGenerator` + `WorkoutCommentaryJob` | One `RubyLLM.chat` call (PlanSuggestionGenerator pattern); context: the workout, plan content, recent training. Appends commentary to the workout page body via `append_blocks`. Gate: chained only when `WorkoutSync` sets `notion_page_id` from nil → present, so it runs once per workout. (A permanently failed job never re-fires — accepted for single-user.) |
 | `Notion::DailyLogCommentaryGenerator` + job | ~10pm PT: builds full-day context (metrics, food, workouts, plan), writes narrative to the row's `Notes`; computes + merges data-computable Red Flags. |
-| `Notion::WeeklyReviewGenerator` + job | Sunday ~9pm PT: computes aggregates from DB, sums `Planned km` from that week's planned Notion rows, LLM writes Status / What Worked / What Broke / Adjustment / Red Flags Triggered. |
+| `Notion::WeeklyReviewGenerator` + job | Sunday ~9pm PT: upserts the row by `Week Start` (query first, create only if missing — a retry can't duplicate); computes aggregates from DB, sums `Planned km` from that week's planned Notion rows, LLM writes Status / What Worked / What Broke / Adjustment / Red Flags Triggered. |
 
 ## Field mapping & ownership
 
@@ -117,7 +117,7 @@ strength, etc.) create a new row with `Status: Done`.
 
 | Property | Owner | Source |
 |---|---|---|
-| Actual Distance (km) | automation | `workouts.distance` (converted to km) |
+| Actual Distance (km) | automation | `workouts.distance` converted to km using `workouts.distance_units` (never assume a fixed unit) |
 | Actual Duration (min) | automation | `workouts.duration` / 60 |
 | Actual Avg HR | automation | `workouts.metadata` avg HR if present |
 | Actual Avg Pace | automation | computed `duration / distance`, formatted mm:ss/km |
