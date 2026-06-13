@@ -1,5 +1,5 @@
 module LlmStubbing
-  def stub_llm_chat(response, capture: nil, &block)
+  def stub_llm_chat(response, capture: nil)
     fake_chat = Object.new
     fake_chat.define_singleton_method(:with_params) { |**_| self }
     fake_chat.define_singleton_method(:with_instructions) { |_| self }
@@ -15,7 +15,7 @@ module LlmStubbing
     RubyLLM.define_singleton_method(:chat, original_chat)
   end
 
-  def stub_llm_chat_error(message, &block)
+  def stub_llm_chat_error(message)
     original_chat = RubyLLM.method(:chat)
     RubyLLM.define_singleton_method(:chat) { |**_| raise message }
     yield

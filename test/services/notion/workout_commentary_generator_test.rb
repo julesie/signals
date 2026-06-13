@@ -12,7 +12,7 @@ class Notion::WorkoutCommentaryGeneratorTest < ActiveSupport::TestCase
     ENV["NOTION_API_TOKEN"] = "test-token"
 
     @user = users(:one)
-    @plan = plans(:with_content)
+    @plan = plans(:with_content) # belongs to users(:one) via fixture; the generator reaches it through workout.user.plan
     @fake_response = Data.define(:content).new(content: "Good steady effort today.")
 
     @workout = @user.workouts.create!(
