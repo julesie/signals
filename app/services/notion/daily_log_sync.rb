@@ -63,7 +63,7 @@ module Notion
         "Sleep Hours" => latest_metric("sleep_analysis"),
         "HRV" => latest_metric("heart_rate_variability"),
         "RHR" => latest_metric("resting_heart_rate")
-      }.each { |key, value| props[key] = Properties.number(value) if value }
+      }.each { |key, value| props[key] = Properties.number(value.round(2)) if value }
 
       burned = sum_metric("active_energy") + sum_metric("basal_energy_burned")
       props["Calories Burned"] = Properties.number(burned.round) if burned.positive?
