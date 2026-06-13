@@ -54,12 +54,16 @@ module Notion
       req["Content-Type"] = "application/json"
       req.body = JSON.generate(body)
 
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
-      parsed = JSON.parse(response.body)
+      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 30) { |http| http.request(req) }
       unless response.is_a?(Net::HTTPSuccess)
-        raise Error, "Notion API #{response.code} on #{method.to_s.upcase} #{path}: #{parsed["message"]}"
+        message = begin
+          JSON.parse(response.body)["message"]
+        rescue JSON::ParserError
+          response.body.to_s[0, 200]
+        end
+        raise Error, "Notion API #{response.code} on #{method.to_s.upcase} #{path}: #{message}"
       end
-      parsed
+      JSON.parse(response.body)
     end
   end
 end

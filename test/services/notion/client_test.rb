@@ -48,4 +48,25 @@ class Notion::ClientTest < ActiveSupport::TestCase
     assert_equal :patch, @calls[0][0]
     assert_equal "/blocks/p1/children", @calls[0][1]
   end
+
+  test "request raises Error with raw body snippet when response is non-2xx with non-JSON body" do
+    raw_client = Notion::Client.new(token: "secret")
+
+    fake_response = Net::HTTPBadGateway.new("1.1", "502", "Bad Gateway")
+    fake_response.define_singleton_method(:body) { "<html>oops</html>" }
+
+    fake_http = Object.new
+    fake_http.define_singleton_method(:request) { |_req| fake_response }
+
+    original_start = Net::HTTP.method(:start)
+    Net::HTTP.define_singleton_method(:start) { |*_args, **_opts, &blk| blk.call(fake_http) }
+
+    error = assert_raises(Notion::Client::Error) do
+      raw_client.update_page("p1", properties: {})
+    end
+    assert_includes error.message, "502"
+    assert_includes error.message, "oops"
+  ensure
+    Net::HTTP.define_singleton_method(:start, original_start)
+  end
 end
