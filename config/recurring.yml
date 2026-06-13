@@ -18,3 +18,7 @@ production:
   # notion_catchup:
   #   class: NotionSyncJob
   #   schedule: every 30 minutes
+
+  # daily_log_commentary:
+  #   class: DailyLogCommentaryJob
+  #   schedule: "52 21 * * * America/Los_Angeles"   # 9:52pm PT daily
