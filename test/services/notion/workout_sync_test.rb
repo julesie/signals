@@ -56,6 +56,73 @@ class Notion::WorkoutSyncTest < ActiveSupport::TestCase
     refute props.key?("Notes")
   end
 
+  # Issue 1 / test (a): "Outdoor Run" matches a Planned Easy row
+  test "Outdoor Run matches a planned Easy row" do
+    workout = create_run(workout_type: "Outdoor Run")
+    client = FakeNotionClient.new(query_results: [[planned_row]])
+
+    result = Notion::WorkoutSync.call(@user, date: DATE, client: client)
+
+    assert result.success
+    assert_equal [workout.id], result.newly_synced_workout_ids
+    assert_equal "Easy Run", result.day_type
+    assert_equal "plan-1", workout.reload.notion_page_id
+    assert_equal "Done", client.updates.first[:properties]["Status"]["select"]["name"]
+  end
+
+  # Issue 2 / test (b): "Outdoor Walk" with no candidates → skip entirely
+  test "Outdoor Walk with no candidates is skipped entirely" do
+    workout = create_run(workout_type: "Outdoor Walk", distance: nil, distance_units: nil, metadata: {})
+    client = FakeNotionClient.new(query_results: [[]])
+
+    result = Notion::WorkoutSync.call(@user, date: DATE, client: client)
+
+    assert result.success
+    assert_empty client.creates
+    assert_empty client.updates
+    assert_empty result.newly_synced_workout_ids
+    assert_nil result.day_type
+    assert_nil workout.reload.notion_page_id
+  end
+
+  # Issue 2 / test (c): "Pool Swim" creates an unplanned row with Type "Cross"
+  test "Pool Swim creates unplanned row with Type Cross" do
+    workout = create_run(workout_type: "Pool Swim", distance: 1.5, distance_units: "km", metadata: {})
+    client = FakeNotionClient.new(query_results: [[]])
+
+    result = Notion::WorkoutSync.call(@user, date: DATE, client: client)
+
+    assert result.success
+    assert_equal 1, client.creates.size
+    assert_empty client.updates
+    props = client.creates.first[:properties]
+    assert_equal "Cross", props["Type"]["select"]["name"]
+    assert_equal "Done", props["Status"]["select"]["name"]
+    assert_equal "created-1", workout.reload.notion_page_id
+    assert_equal [workout.id], result.newly_synced_workout_ids
+  end
+
+  # Issue 3 / test (d): adopt a Done row — actuals only, no Status write, empty newly_synced
+  test "adopts a Done candidate: updates actuals only, persists page id, empty newly_synced, correct day_type" do
+    workout = create_run
+    done_row = planned_row(id: "done-1", type: "Easy", status: "Done")
+    client = FakeNotionClient.new(query_results: [[done_row]])
+
+    result = Notion::WorkoutSync.call(@user, date: DATE, client: client)
+
+    assert result.success
+    assert_empty result.newly_synced_workout_ids
+    assert_equal "Easy Run", result.day_type
+    assert_equal "done-1", workout.reload.notion_page_id
+
+    assert_equal 1, client.updates.size
+    props = client.updates.first[:properties]
+    assert_equal "done-1", client.updates.first[:page_id]
+    refute props.key?("Status"), "Should NOT write Status when adopting a Done row"
+    assert props.key?("Actual Duration (min)")
+  end
+
+  # Issue 3 / test (e): Skipped rows are not adopted — Golf falls through to unplanned create
   test "ignores Skipped and Done rows as candidates and creates unplanned row" do
     workout = create_run(workout_type: "Golf", distance: nil, distance_units: nil, metadata: {})
     client = FakeNotionClient.new(query_results: [[planned_row(status: "Skipped", type: "Golf")]])
