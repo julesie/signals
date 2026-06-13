@@ -197,6 +197,35 @@ class Notion::WeeklyReviewGeneratorTest < ActiveSupport::TestCase
     end
   end
 
+  # regression: threshold must be evaluated on the union of existing + new flags
+  test "adds Multiple red flags when existing row already has 2 flags and new logs contribute 2 more" do
+    existing = {
+      "id" => "weekly-existing-2",
+      "properties" => {
+        "Red Flags Triggered" => {"multi_select" => [{"name" => "Low mood"}, {"name" => "Sharp pain"}]}
+      }
+    }
+    daily_logs_rows = [
+      daily_log_row(red_flags: ["RHR up", "HRV down"])
+    ]
+
+    client = FakeNotionClient.new(query_results: [[existing], [], daily_logs_rows])
+
+    stub_llm_chat(@fake_llm_response) do
+      result = Notion::WeeklyReviewGenerator.call(@user, date: DATE, client: client)
+
+      assert result.success
+      props = client.updates.first[:properties]
+      flag_names = props["Red Flags Triggered"]["multi_select"].map { |f| f["name"] }
+
+      assert_includes flag_names, "Low mood"
+      assert_includes flag_names, "Sharp pain"
+      assert_includes flag_names, "RHR up"
+      assert_includes flag_names, "HRV down"
+      assert_includes flag_names, "Multiple red flags"
+    end
+  end
+
   # (d) malformed LLM JSON → "Cautious" fallback, aggregates still written
   test "malformed LLM JSON falls back to Cautious status with raw text in What Worked" do
     raw_bad_response = Data.define(:content).new(content: "Sorry, I cannot do that right now.")

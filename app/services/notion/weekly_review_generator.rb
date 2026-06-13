@@ -171,11 +171,14 @@ module Notion
       end.uniq
 
       mapped = raw_flags.map { |f| FLAG_MAP.fetch(f, f) }.select { |f| ALLOWED_RED_FLAGS.include?(f) }.uniq
-      mapped << "Multiple red flags" if mapped.size >= 3 && !mapped.include?("Multiple red flags")
 
-      # Merge with existing page flags (merge-only on update)
+      # Merge with existing page flags (merge-only on update), then threshold
       existing_flags = existing_page ? Properties.read_multi_select(existing_page.dig("properties", "Red Flags Triggered")) : []
-      (existing_flags | mapped).sort
+      merged = (existing_flags | mapped).sort
+      if merged.count { |f| f != "Multiple red flags" } >= 3 && !merged.include?("Multiple red flags")
+        merged = (merged << "Multiple red flags").sort
+      end
+      merged
     end
 
     def call_llm(aggregates, red_flags, week)
