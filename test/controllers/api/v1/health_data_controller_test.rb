@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Api::V1::HealthDataControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup do
     @user = User.find_or_create_by!(email: "jules@julescoleman.com") do |u|
       u.password = "password123!"
@@ -70,5 +72,23 @@ class Api::V1::HealthDataControllerTest < ActionDispatch::IntegrationTest
 
     assert @user.workouts.count > 0
     assert @user.health_metrics.count > 0
+  end
+
+  test "enqueues NotionSyncJob on successful payload" do
+    assert_enqueued_with(job: NotionSyncJob) do
+      post api_v1_health_data_path,
+        params: @payload,
+        headers: {"Authorization" => "Bearer #{@token}"},
+        as: :json
+    end
+  end
+
+  test "does not enqueue NotionSyncJob on failed payload" do
+    assert_no_enqueued_jobs(only: NotionSyncJob) do
+      post api_v1_health_data_path,
+        params: {data: {metrics: "bad"}},
+        headers: {"Authorization" => "Bearer #{@token}"},
+        as: :json
+    end
   end
 end

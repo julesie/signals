@@ -1,0 +1,17 @@
+{
+  "planPath": "docs/superpowers/plans/2026-06-12-notion-training-sync.md",
+  "tasks": [
+    {"id": 6, "subject": "Task 1: Migration — notion_page_id on workouts", "status": "completed"},
+    {"id": 7, "subject": "Task 2: Notion::Properties", "status": "completed"},
+    {"id": 8, "subject": "Task 3: Notion::Client", "status": "completed", "blockedBy": [7]},
+    {"id": 9, "subject": "Task 4: Notion::TrainingWeek", "status": "completed"},
+    {"id": 10, "subject": "Task 5: Notion::DailyLogSync", "status": "completed", "blockedBy": [8, 9]},
+    {"id": 11, "subject": "Task 6: Notion::WorkoutSync", "status": "completed", "blockedBy": [6, 8, 9, 10]},
+    {"id": 12, "subject": "Task 7: NotionSyncJob + webhook chaining + recurring entry", "status": "completed", "blockedBy": [10, 11]},
+    {"id": 13, "subject": "Task 8: Workout commentary generator + job", "status": "completed", "blockedBy": [12]},
+    {"id": 14, "subject": "Task 9: Red flags + daily commentary", "status": "completed", "blockedBy": [12]},
+    {"id": 15, "subject": "Task 10: Weekly review generator + job", "status": "completed", "blockedBy": [12]},
+    {"id": 16, "subject": "Task 11: End-to-end verification + staged rollout", "status": "in_progress", "note": "Local verification complete (one-shot sync, commentary, weekly review all verified against real Notion). Remaining: Render env vars, merge PR #27, deploy, enable evening jobs after a clean day.", "blockedBy": [13, 14, 15]}
+  ],
+  "lastUpdated": "2026-06-12"
+}

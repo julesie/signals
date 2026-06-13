@@ -13,3 +13,16 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+
+  # One-shot verification passed 2026-06-12; catchup enabled per rollout plan.
+  notion_catchup:
+    class: NotionSyncJob
+    schedule: every 30 minutes
+
+  # daily_log_commentary:
+  #   class: DailyLogCommentaryJob
+  #   schedule: "52 21 * * * America/Los_Angeles"   # 9:52pm PT daily
+
+  # weekly_review:
+  #   class: WeeklyReviewJob
+  #   schedule: "22 21 * * 0 America/Los_Angeles"   # Sundays 9:22pm PT

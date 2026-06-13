@@ -12,6 +12,7 @@ class Api::V1::HealthDataController < ActionController::API
     result = HealthDataProcessor.call(health_payload, user: user)
 
     if result.success
+      NotionSyncJob.perform_later
       render json: {
         status: "ok",
         metrics_count: result.metrics_created,
