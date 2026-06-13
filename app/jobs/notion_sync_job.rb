@@ -1,5 +1,6 @@
 class NotionSyncJob < ApplicationJob
   limits_concurrency to: 1, key: "notion_sync"
+  retry_on Notion::Client::Error, wait: :polynomially_longer, attempts: 3
 
   def perform
     user = User.find_by!(email: "jules@julescoleman.com")
@@ -19,6 +20,6 @@ class NotionSyncJob < ApplicationJob
       end
     end
 
-    raise "NotionSyncJob partial failure: #{errors.join("; ")}" if errors.any?
+    raise Notion::Client::Error, "NotionSyncJob partial failure: #{errors.join("; ")}" if errors.any?
   end
 end

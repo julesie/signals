@@ -249,6 +249,20 @@ class Notion::WeeklyReviewGeneratorTest < ActiveSupport::TestCase
     end
   end
 
+  test "LLM transport error fails the run without writing anything" do
+    workouts_rows = [workout_row(status: "Done", type: "Easy", planned_km: 5.0, actual_km: 5.0)]
+    client = FakeNotionClient.new(query_results: [[], workouts_rows, []])
+
+    stub_llm_chat_error("API timeout") do
+      result = Notion::WeeklyReviewGenerator.call(@user, date: DATE, client: client)
+
+      refute result.success
+      assert_match "API timeout", result.error
+      assert_empty client.creates
+      assert_empty client.updates
+    end
+  end
+
   # (e) Long Run Distance only considers Done+Long rows
   test "Long Run Distance only considers Done rows with Type Long" do
     workouts_rows = [

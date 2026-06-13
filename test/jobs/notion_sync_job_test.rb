@@ -55,7 +55,7 @@ class NotionSyncJobTest < ActiveJob::TestCase
     Notion::DailyLogSync.define_singleton_method(:call, orig_daily_call)
   end
 
-  test "raises after processing both dates when WorkoutSync fails, still calls DailyLogSync for both" do
+  test "retries after processing both dates when WorkoutSync fails, still calls DailyLogSync for both" do
     daily_calls = []
     failed_workout_result = Notion::WorkoutSync::Result.new(
       success: false, error: "boom", newly_synced_workout_ids: [], day_type: nil
@@ -73,7 +73,9 @@ class NotionSyncJobTest < ActiveJob::TestCase
       daily_result
     end
 
-    assert_raises(RuntimeError, /NotionSyncJob partial failure/) do
+    # The partial-failure raise is a Notion::Client::Error, which retry_on
+    # intercepts and re-enqueues rather than letting it propagate.
+    assert_enqueued_with(job: NotionSyncJob) do
       NotionSyncJob.perform_now
     end
 

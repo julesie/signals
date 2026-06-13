@@ -16,6 +16,8 @@ module Notion
 
     VALID_STATUSES = ["On Track", "Cautious", "Concern", "Off Plan"].freeze
 
+    InvalidStatusError = Class.new(StandardError)
+
     SYSTEM_PROMPT = <<~PROMPT
       You are a running coach writing a weekly training review for an athlete preparing
       for the SF Half Marathon (race day: 2026-07-26). Given the week's aggregated data,
@@ -209,16 +211,20 @@ module Notion
         #{plan&.content || "No plan on file."}
       CONTEXT
 
+      # Transport/API errors propagate to the outer rescue in #call — a failed
+      # LLM call must fail the run, not masquerade as a Cautious review.
       response = RubyLLM.chat(model: ENV.fetch("LLM_MODEL", "gpt-5-nano"))
         .with_params(reasoning_effort: "medium")
         .with_instructions(SYSTEM_PROMPT)
         .ask(context)
 
-      content = response.content
-      raw = content[/\{.*\}/m]
-      parsed = JSON.parse(raw.to_s)
+      parse_llm_response(response.content)
+    end
+
+    def parse_llm_response(content)
+      parsed = JSON.parse(content.to_s[/\{.*\}/m].to_s)
       status = parsed["status"]
-      raise "invalid status: #{status.inspect}" unless VALID_STATUSES.include?(status)
+      raise InvalidStatusError, "invalid status: #{status.inspect}" unless VALID_STATUSES.include?(status)
 
       {
         status: status,
@@ -226,10 +232,9 @@ module Notion
         what_broke: parsed["what_broke"].to_s,
         adjustment: parsed["adjustment_for_next_week"].to_s
       }
-    rescue => e
-      Rails.logger.error("Notion::WeeklyReviewGenerator LLM failed for #{@date}: #{e.class}: #{e.message}")
-      raw_text = (defined?(content) && content) ? content.to_s : e.message.to_s
-      {status: "Cautious", what_worked: raw_text, what_broke: "", adjustment: "", fallback: true}
+    rescue JSON::ParserError, InvalidStatusError => e
+      Rails.logger.error("Notion::WeeklyReviewGenerator LLM output invalid for #{@date}: #{e.message}")
+      {status: "Cautious", what_worked: content.to_s, what_broke: "", adjustment: ""}
     end
 
     def build_properties(aggregates, red_flags, llm_result)
