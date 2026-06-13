@@ -44,10 +44,43 @@ class NotionSyncJobTest < ActiveJob::TestCase
     NotionSyncJob.perform_now
 
     today = Notion::TrainingWeek.today
+    assert_equal 4, calls.size
     assert_equal [:workout, today - 1], calls[0]
     assert_equal [:daily, today - 1, "Easy Run"], calls[1]
     assert_equal [:workout, today], calls[2]
+    assert_equal [:daily, today, "Easy Run"], calls[3]
     assert_enqueued_with(job: WorkoutCommentaryJob, args: [42])
+  ensure
+    Notion::WorkoutSync.define_singleton_method(:call, orig_workout_call)
+    Notion::DailyLogSync.define_singleton_method(:call, orig_daily_call)
+  end
+
+  test "raises after processing both dates when WorkoutSync fails, still calls DailyLogSync for both" do
+    daily_calls = []
+    failed_workout_result = Notion::WorkoutSync::Result.new(
+      success: false, error: "boom", newly_synced_workout_ids: [], day_type: nil
+    )
+    daily_result = Notion::DailyLogSync::Result.new(success: true, page_id: "p", created: false)
+
+    orig_workout_call = Notion::WorkoutSync.method(:call)
+    orig_daily_call = Notion::DailyLogSync.method(:call)
+
+    Notion::WorkoutSync.define_singleton_method(:call) do |user, date:, client:|
+      failed_workout_result
+    end
+    Notion::DailyLogSync.define_singleton_method(:call) do |user, date:, day_type:, client:|
+      daily_calls << date
+      daily_result
+    end
+
+    assert_raises(RuntimeError, /NotionSyncJob partial failure/) do
+      NotionSyncJob.perform_now
+    end
+
+    today = Notion::TrainingWeek.today
+    assert_equal 2, daily_calls.size, "DailyLogSync should be called for both dates even on partial failure"
+    assert_includes daily_calls, today - 1
+    assert_includes daily_calls, today
   ensure
     Notion::WorkoutSync.define_singleton_method(:call, orig_workout_call)
     Notion::DailyLogSync.define_singleton_method(:call, orig_daily_call)
