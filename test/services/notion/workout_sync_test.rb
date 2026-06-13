@@ -111,4 +111,16 @@ class Notion::WorkoutSyncTest < ActiveSupport::TestCase
     assert_nil result.day_type
     assert_empty result.newly_synced_workout_ids
   end
+
+  test "pace rounds correctly when seconds-per-km crosses minute boundary" do
+    # 2098 seconds / 5.0 km = 419.6 s/km → rounds to 420 → 7:00/km
+    create_run(duration: 2098)
+    client = FakeNotionClient.new(query_results: [[planned_row]])
+
+    result = Notion::WorkoutSync.call(@user, date: DATE, client: client)
+
+    assert result.success
+    props = client.updates.first[:properties]
+    assert_equal "7:00/km", props["Actual Avg Pace"]["rich_text"].first["text"]["content"]
+  end
 end

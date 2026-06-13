@@ -100,8 +100,8 @@ module Notion
     end
 
     def pace(workout, km)
-      seconds_per_km = workout.duration / km
-      format("%d:%02d/km", seconds_per_km / 60, (seconds_per_km % 60).round)
+      total_seconds = (workout.duration / km).round
+      format("%d:%02d/km", total_seconds / 60, total_seconds % 60)
     end
 
     def unplanned_properties(workout)
