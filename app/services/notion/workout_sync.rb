@@ -3,10 +3,11 @@ module Notion
     Result = Struct.new(:success, :newly_synced_workout_ids, :day_type, :error, keyword_init: true)
 
     RUN_NOTION_TYPES = %w[Easy Quality Long Race].freeze
+    # No "Cross" entry: the Daily Logs Day Type select has no Cross option,
+    # and writing an unknown select name would silently add it to the schema.
     DAY_TYPE_FOR_NOTION_TYPE = {
       "Long" => "Long Run", "Quality" => "Hard Run", "Race" => "Hard Run",
-      "Easy" => "Easy Run", "Strength" => "Strength", "Golf" => "Golf",
-      "Cross" => "Cross"
+      "Easy" => "Easy Run", "Strength" => "Strength", "Golf" => "Golf"
     }.freeze
     MI_TO_KM = 1.609344
 
