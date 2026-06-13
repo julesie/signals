@@ -22,3 +22,7 @@ production:
   # daily_log_commentary:
   #   class: DailyLogCommentaryJob
   #   schedule: "52 21 * * * America/Los_Angeles"   # 9:52pm PT daily
+
+  # weekly_review:
+  #   class: WeeklyReviewJob
+  #   schedule: "22 21 * * 0 America/Los_Angeles"   # Sundays 9:22pm PT
