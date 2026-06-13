@@ -58,10 +58,12 @@ module Notion
 
     def data_properties
       props = {}
-      props["Weight (kg)"] = Properties.number(latest_metric("weight")) if latest_metric("weight")
-      props["Sleep Hours"] = Properties.number(latest_metric("sleep_analysis")) if latest_metric("sleep_analysis")
-      props["HRV"] = Properties.number(latest_metric("heart_rate_variability")) if latest_metric("heart_rate_variability")
-      props["RHR"] = Properties.number(latest_metric("resting_heart_rate")) if latest_metric("resting_heart_rate")
+      {
+        "Weight (kg)" => latest_metric("weight"),
+        "Sleep Hours" => latest_metric("sleep_analysis"),
+        "HRV" => latest_metric("heart_rate_variability"),
+        "RHR" => latest_metric("resting_heart_rate")
+      }.each { |key, value| props[key] = Properties.number(value) if value }
 
       burned = sum_metric("active_energy") + sum_metric("basal_energy_burned")
       props["Calories Burned"] = Properties.number(burned.round) if burned.positive?
@@ -90,7 +92,8 @@ module Notion
 
     def latest_metric(name)
       @latest ||= {}
-      @latest[name] ||= @user.health_metrics
+      return @latest[name] if @latest.key?(name)
+      @latest[name] = @user.health_metrics
         .where(metric_name: name, recorded_at: day_range)
         .order(recorded_at: :desc).first&.value&.to_f
     end

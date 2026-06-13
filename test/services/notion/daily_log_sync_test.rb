@@ -56,6 +56,7 @@ class Notion::DailyLogSyncTest < ActiveSupport::TestCase
     refute props.key?("Notes")
     refute props.key?("Red Flags")
     assert_equal "Long Run", props["Day Type"]["select"]["name"] # Rest -> Long Run upgrade
+    assert_equal 61.2, props["Weight (kg)"]["number"]
   end
 
   test "does not downgrade or overwrite a human-set day type" do
