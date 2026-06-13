@@ -51,7 +51,8 @@ module Notion
       page = query_page
       return page if page
 
-      DailyLogSync.call(@user, date: @date, client: @client)
+      result = DailyLogSync.call(@user, date: @date, client: @client)
+      Rails.logger.error("Notion::DailyLogCommentaryGenerator: DailyLogSync failed creating page for #{@date}: #{result.error}") unless result.success
       query_page
     end
 
