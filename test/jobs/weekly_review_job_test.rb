@@ -48,7 +48,7 @@ class WeeklyReviewJobTest < ActiveJob::TestCase
     Notion::WeeklyReviewGenerator.define_singleton_method(:call, orig_call)
   end
 
-  test "failure path logs without raising" do
+  test "failure path re-raises so retry_on re-enqueues instead of silently dropping" do
     failure_result = Notion::WeeklyReviewGenerator::Result.new(
       success: false, error: "something went wrong"
     )
@@ -58,7 +58,10 @@ class WeeklyReviewJobTest < ActiveJob::TestCase
       failure_result
     end
 
-    assert_nothing_raised do
+    # The generator swallows exceptions into a failure Result, so the job
+    # re-raises Notion::Client::Error to let retry_on re-enqueue a retry
+    # rather than losing the week's review to a single log line.
+    assert_enqueued_with(job: WeeklyReviewJob) do
       WeeklyReviewJob.perform_now
     end
   ensure

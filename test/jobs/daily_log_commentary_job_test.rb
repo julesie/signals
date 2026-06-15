@@ -42,7 +42,7 @@ class DailyLogCommentaryJobTest < ActiveJob::TestCase
     Notion::DailyLogCommentaryGenerator.define_singleton_method(:call, orig_call)
   end
 
-  test "failure path logs without raising" do
+  test "failure path re-raises so retry_on re-enqueues instead of silently dropping" do
     failure_result = Notion::DailyLogCommentaryGenerator::Result.new(
       success: false, error: "something went wrong"
     )
@@ -52,7 +52,10 @@ class DailyLogCommentaryJobTest < ActiveJob::TestCase
       failure_result
     end
 
-    assert_nothing_raised do
+    # The generator swallows exceptions into a failure Result, so the job
+    # re-raises Notion::Client::Error to let retry_on re-enqueue a retry
+    # rather than losing the day's narrative to a single log line.
+    assert_enqueued_with(job: DailyLogCommentaryJob) do
       DailyLogCommentaryJob.perform_now
     end
   ensure
